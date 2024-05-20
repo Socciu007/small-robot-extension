@@ -1,8 +1,8 @@
 {
     "manifest_version": 2,
-    "name": "泛远助手",
+    "name": "ROBOT助手",
     "version": "1.1.60603.9",
-    "description": "泛远助手",
+    "description": "ROBOT助手",
     "permissions": [
         "tabs",
         "storage",
@@ -15,7 +15,7 @@
         "default_icon": {
             "19": "assets/images/logo.png"
         },
-        "default_title": "泛远助手-学习版",
+        "default_title": "ROBOT助手-学习版",
         "default_popup": "popup.html"
     }
 }
