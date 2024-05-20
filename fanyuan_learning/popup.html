@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" data-ng-app="FyApp" data-ng-csp>
+<head>
+<meta charset="utf-8"/>
+    <link href="assets/libs/bootstrap-3.3.4-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/popup.css" rel="stylesheet">
+    <link href="assets/libs/angular-1.4.0-rc.2/angular-csp.css" rel="stylesheet">
+</head>
+<body data-ng-controller="popupController">
+    <div class="row">
+        <div class="col-xs-10">
+            <div class="form-group">
+                内容：
+                <input type="text" style="width: 80%;" name="" id="" ng-model="inputValue">
+            </div>
+        </div>
+        <div class="col-xs-2">
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" data-ng-click="runFile()">执行</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12">
+        <alert data-ng-type="alert_message.type" close="closeAlert()" data-ng-show="alert_message.show">{{alert_message.message}}</alert>
+    </div>
+<!-- <div class="row">
+    <div class="col-xs-12">
+        <div class="form-group">
+            航线：
+            <select ng-model='route' class="select">
+                <option ng-repeat="item in routeDate track by $index" value="{{item.id}}">
+                    {{item.value}}</option>
+            </select>
+            <button type="button" data-ng-show="!hadRunning" class="btn btn-primary" data-ng-click="runFile()">执行</button>
+            <button type="button" data-ng-show="hadRunning" class="btn btn-primary" data-ng-click="run()">执行</button>
+        </div>
+    </div> 
+    <div class="col-xs-12">
+        <div class="form-group" data-ng-show="!finish && runningPort">
+           <p>正在执行的港口：</p>
+           <p>{{opPort[route][0].start}}~{{opPort[route][0].endEB}}</p>
+        </div>
+        <alert data-ng-type="success" data-ng-show="finish && !runningPort">{{finishTxt}}</alert>
+    </div> 
+	<div class="col-xs-12">
+      <alert data-ng-type="alert_message.type" close="closeAlert()" data-ng-show="alert_message.show">{{alert_message.message}}</alert>
+    </div>
+</div> -->
+</body>
+<script src="assets/libs/jquery-2.1.4.min.js"></script>
+<script src="assets/libs/angular-1.4.0-rc.2/angular.min.js"></script>
+<script src="assets/libs/angular-1.4.0-rc.2/plugins/ui-bootstrap-tpls-0.13.0.min.js"></script>
+<script src="assets/js/emc_data_map.js"></script>
+<script src="assets/js/countTime"></script>
+<script src="assets/js/popup.js"></script>
+</html>
