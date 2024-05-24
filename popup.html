@@ -1,18 +1,33 @@
-
-
 <!DOCTYPE html>
-<html>
+<html lang="en" data-ng-app="FyApp" data-ng-csp>
 <head>
-    <title>Freight Smart Extension</title>
-    <link rel="stylesheet" href="assets/libs/bootstrap-3.3.4-dist/css/bootstrap.min.css">
+<meta charset="utf-8"/>
+    <link href="assets/libs/bootstrap-3.3.4-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/popup.css" rel="stylesheet">
+    <link href="assets/libs/angular-1.4.0-rc.2/angular-csp.css" rel="stylesheet">
 </head>
-<body>
-    <div class="container">
-        <h2>Freight Smart Data Crawler</h2>
-        <button id="loginButton" class="btn btn-primary">Login and Retrieve Data</button>
+<body data-ng-controller="popupController">
+    <div class="row">
+        <div class="col-xs-10">
+            <div class="form-group">
+                内容：
+                <input type="text" style="width: 80%;" name="" id="" ng-model="inputValue">
+            </div>
+        </div>
+        <div class="col-xs-2">
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" data-ng-click="runFile()">执行</button>
+            </div>
+        </div>
     </div>
-    <script src="assets/libs/jquery-2.1.4.min.js"></script>
-    <script src="popup.js"></script>
+    <div class="col-xs-12">
+        <alert data-ng-type="alert_message.type" close="closeAlert()" data-ng-show="alert_message.show">{{alert_message.message}}</alert>
+    </div>
 </body>
+<script src="assets/libs/jquery-2.1.4.min.js"></script>
+<script src="assets/libs/angular-1.4.0-rc.2/angular.min.js"></script>
+<script src="assets/libs/angular-1.4.0-rc.2/plugins/ui-bootstrap-tpls-0.13.0.min.js"></script>
+<script src="assets/js/emc_data_map.js"></script>
+<script src="assets/js/countTime"></script>
+<script src="assets/js/popup.js"></script>
 </html>
-

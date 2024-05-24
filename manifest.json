@@ -1,26 +1,21 @@
 {
-  "manifest_version": 3,
-  "name": "Small Robot Crawl",
-  "version": "1.0",
-  "description": "Extension to automate login and form filling",
-   "permissions": [
-    "activeTab",
-    "scripting",
-    "tabs",
-    "storage",
-    "webNavigation"
-  ],
-  "action": {
-    "default_popup": "popup.html"
-  },
-  "background": {
-    "service_worker": "background.js"
-  },
-  "content_scripts": [
-    {
-      "matches": ["https://freightsmart.oocl.com/*"],
-      "js": ["content.js"],
-      "type": "module"
+    "manifest_version": 2,
+    "name": "泛远助手",
+    "version": "1.1.60603.9",
+    "description": "泛远助手",
+    "permissions": [
+        "tabs",
+        "storage",
+        "*://www.master-agency.com.cn/*",
+        "*://synconhub.coscoshipping.com/*",
+        "*://*.sfyf.cn/*",
+        "<all_urls>"
+    ],
+    "browser_action": {
+        "default_icon": {
+            "19": "assets/images/logo.png"
+        },
+        "default_title": "泛远助手-学习版",
+        "default_popup": "popup.html"
     }
-  ]
 }
