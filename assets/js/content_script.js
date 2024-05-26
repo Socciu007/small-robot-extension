@@ -8,13 +8,7 @@ async function setManifestHtml() {
   await sleep(1000); //等待1s
   // $('su').click()//点击‘百度一下’查询按钮
   await mClick(await $("su"));
-  await sleep(3000);
-  await mClick(
-    await cSelector(
-      "#s_tab > div > a.s-tab-item.s-tab-item_1CwH-.s-tab-wenku_GwhrW.s-tab-wenku"
-    )
-  );
-  await sleep(10000);
+  await sleep(5000);
   const data = await crawlData();
   return data;
 }
@@ -27,10 +21,21 @@ chrome.extension.onMessage.addListener(async function (
   await sleep(1200);
   manifestRequest = request.data;
   console.log(manifestRequest, "目标页接收的值");
-  const data = await setManifestHtml(); // 进行需求处理
+
+  // 进行需求处理
+  const data = await setManifestHtml();
   console.log(data);
-  // await sleep(2000);
-  // chrome.runtime.sendMessage({ 'data': data }, () => { })	 //回调 （将有需要的数据传回popup.js）
+  await sleep(2000);
+
+  //回调 （将有需要的数据传回popup.js
+  setTimeout(() => {
+    chrome.runtime.sendMessage(
+      { action: "send", data: data },
+      function (response) {
+        // console.log("Response from server", response);
+      }
+    );
+  }, 1000);
 });
 
 // 鼠标点击事件
@@ -74,10 +79,10 @@ function enterEvt(dom) {
       var enterEvt = new KeyboardEvent("keydown", {
         bubbles: true,
         cancelable: true,
-        key: "Enter", // 'key' là giá trị chuỗi đại diện cho phím được nhấn
-        code: "Enter", // 'code' là giá trị chuỗi đại diện cho mã phím
-        keyCode: 13, // 'keyCode' là mã số phím được nhấn
-        which: 13, // 'which' là mã số phím được nhấn (giống như keyCode)
+        key: "Enter",
+        code: "Enter",
+        keyCode: 13,
+        which: 13,
       });
       dom.dispatchEvent(enterEvt);
       resolve("Event dispatched successfully");
@@ -179,11 +184,11 @@ function cName(name) {
 
 function crawlData() {
   let data = {};
+  document.querySelectorAll("script").forEach((script) => script.remove());
   data = {
     // html: document.documentElement.outerHTML,
-    // text: document.body.textContent.split("\n"),
-    content: cSelector(".search-center-left").textContent.split("\n"),
+    text: document.body.innerText.split("\n"),
+    // content: cSelector("div#wrapper_wrapper").textContent.split("\n"),
   };
-
   return data;
 }
