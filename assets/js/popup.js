@@ -5,7 +5,7 @@ FyApp.controller("popupController", [
   "$http",
   function popupController($scope, $http) {
     // var zl_manifest_url = "https://www.baidu.com/"; //目标网址
-    var zl_manifest_url = "https://freightsmart.oocl.com/zh-hans/"
+    var zl_manifest_url = "https://freightsmart.oocl.com/zh-hans"
     $scope.working_tab_id = 0;
     $scope.pageLoaded = false;
     chrome.storage.local.get(["pageLoaded"], function (items) {

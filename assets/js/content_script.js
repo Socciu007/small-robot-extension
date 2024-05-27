@@ -1,17 +1,17 @@
 var manifestRequest = {};
-const user = {
+const users = {
 	name: "riverhe",
 	password: "Fy112516",
-}
+};
 // let popupPort;
 async function setManifestHtml() {
 	try {
 		var request = manifestRequest; // 从popup.js页面获取的数据
 		// active automation
 		await mClick(await cSelector('a[href="/zh-hans/login/"]'));
-		console.log("click");
-		await sleep(random(1000, 3000));
-		await loginOOCL(user.name, user.password);
+		console.log("click1");
+		await sleep(random(5000, 10000));
+		await loginOOCL(users.name, users.password);
 		console.log("Login completed");
 		// const isLogin = await isLoggedIn();
 		// console.log('isLogin', isLogin);
@@ -19,7 +19,7 @@ async function setManifestHtml() {
 		// 	console.log("auto");
 
 		// } else {
-		// 	await loginOOCL(user.name, user.password);
+		// 	await loginOOCL(users.name, users.password);
 		// 	console.log("Login completed");
 		// }
 	} catch (error) {
@@ -42,13 +42,12 @@ chrome.runtime.onMessage.addListener(async function (
 	sender,
 	sendResponse
 ) {
-	await sleep(1200);
+	await sleep(5000);
 	manifestRequest = request.data;
 	console.log(manifestRequest, "目标页接收的值");
 
 	// 进行需求处理
 	await setManifestHtml();
-
 	await sleep(2000);
 
 	//回调 （将有需要的数据传回popup.js
@@ -203,20 +202,22 @@ async function loginOOCL(userName, password) {
 	let isLogin = false
 	try {
 		const eleUserName = await cSelector('input[class="el-input__inner"]');
-		console.log('ele', eleUserName);
-		if (eleUserName) {
+		const eleNext = await cSelector('button[type="button"]');
+		if (eleUserName && eleNext) {
 			await inputTyping(eleUserName, userName);
 			await sleep(random(1000, 3000));
-			await enterEvt(eleUserName);
+			await mClick(eleNext);
 			await sleep(random(1000, 3000));
+
 			const elePassword = await cSelector('input#login-password-input');
-			if (elePassword && elePassword.value === password) {
-				await mClick(cSelector('button[type="button"]'));
+			const eleLogin = await cSelector('button[type="button"]');
+			if (elePassword && eleLogin && elePassword.value === password) {
+				await mClick(await cSelector('button[type="button"]'));
 				isLogin = true;
-			} else if (elePassword) {
+			} else if (elePassword && eleLogin) {
 				await inputTyping(elePassword, password, 1000)
 				await sleep(random(1000, 3000));
-				await mClick(cSelector('button[type="button"]'));
+				await mClick(eleLogin);
 				isLogin = true;
 			} else {
 				isLogin = false;
