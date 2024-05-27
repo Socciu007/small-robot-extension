@@ -5,7 +5,7 @@ FyApp.controller("popupController", [
   "$http",
   function popupController($scope, $http) {
     // var zl_manifest_url = "https://www.baidu.com/"; //目标网址
-    var zl_manifest_url = "https://freightsmart.oocl.com/zh-hans"
+    var zl_manifest_url = "https://freightsmart.oocl.com/digital/product/search-quote"
     $scope.working_tab_id = 0;
     $scope.pageLoaded = false;
     chrome.storage.local.get(["pageLoaded"], function (items) {
@@ -35,7 +35,7 @@ FyApp.controller("popupController", [
         // 传输数据给目标页
         chrome.tabs.sendMessage(
           $scope.working_tab_id,
-          { data: $scope.inputValue },
+          { action: 'search', data: $scope.inputValue },
           (res) => {
             console.log("res", res);
           }
@@ -62,7 +62,33 @@ FyApp.controller("popupController", [
       sender,
       sendResponse
     ) {
-      console.log(request, "回调数据");
+      if (request.actionId === 'searchComplete') {
+        if (request.status === 'OK') {
+          $scope.showAlert("Success", "success");
+          // url new and action next
+          chrome.tabs.update($scope.working_tab_id, { url: 'https://freightsmart.oocl.com/app/login?loginType=OOCL' }, function () {
+            chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo, tab) {
+              if (tabId === $scope.working_tab_id && changeInfo.status === 'complete') {
+                chrome.tabs.onUpdated.removeListener(listener);
+                // action request
+                chrome.tabs.sendMessage(
+                  $scope.working_tab_id,
+                  { action: 'login' }
+                );
+              }
+            });
+          });
+        } else {
+          $scope.showAlert("Error", "danger");
+        }
+      } else if (request.actionId === 'loginComplete') {
+        if (request.status === 'success') {
+          $scope.showAlert("Next action completed successfully", "success");
+          // Trigger next actions if needed
+        } else {
+          $scope.showAlert("Next action failed", "danger");
+        }
+      }
       // 处理从content_script的回传数据，可将数据通过外部接口进行传输
       $.ajax({
         url: "接口地址",
@@ -98,12 +124,30 @@ FyApp.controller("popupController", [
     //判断目标页是否已经打开
     $scope.runWorkingStage = function (tab) {
       if (tab.url.indexOf(zl_manifest_url) === -1) {
-        chrome.tabs.update(tab.id, { url: zl_manifest_url });
+        chrome.tabs.update(tab.id, { url: zl_manifest_url }, function () {
+          chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+            if (tabId === tab.id && changeInfo.status === 'complete') {
+              chrome.tabs.onUpdated.removeListener(listener);
+              $scope.pageLoaded = true;
+              chrome.storage.local.set({ pageLoaded: true });
+              $scope.$apply();
+              $scope.runFile();
+            }
+          });
+        });
       } else {
         $scope.closeAlert();
       }
       $scope.$apply();
     };
+    // $scope.runWorkingStage = function (tab) {
+    //   if (tab.url.indexOf(zl_manifest_url) === -1) {
+    //     chrome.tabs.update(tab.id, { url: zl_manifest_url });
+    //   } else {
+    //     $scope.closeAlert();
+    //   }
+    //   $scope.$apply();
+    // };
 
     $(function () {
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {

@@ -1,54 +1,39 @@
 var manifestRequest = {};
-const users = {
-	name: "riverhe",
-	password: "Fy112516",
-};
-// let popupPort;
-async function setManifestHtml() {
+async function setManifestHtml(request) {
 	try {
-		var request = manifestRequest; // 从popup.js页面获取的数据
-		// active automation
-		await mClick(await cSelector('a[href="/zh-hans/login/"]'));
-		console.log("click1");
-		await sleep(random(5000, 10000));
-		await loginOOCL(users.name, users.password);
-		console.log("Login completed");
-		// const isLogin = await isLoggedIn();
-		// console.log('isLogin', isLogin);
-		// if (isLogin) {
-		// 	console.log("auto");
+		const eleFrom = await $('el-id-6884-24')
+		console.log(eleFrom);
+		await inputValue(eleFrom, "Shanghai, China")
+		await sleep(2000);
+		//Shanghai, China
+		//Singapore, Singapore
 
-		// } else {
-		// 	await loginOOCL(users.name, users.password);
-		// 	console.log("Login completed");
-		// }
+		const eleTo = await $('el-id-6884-25');
+		await inputValue(eleTo, "Singapore, Singapore");
+		await sleep(2000);
+
+		const eleQuantity = await $('el-id-6884-25');
+		await inputValue(eleQuantity, 1);
+		await sleep(2000);
+
+		const eleSearch = await cSelector('button.search-button');
+		await mClick(eleSearch);
+
+		chrome.runtime.sendMessage({ actionId: 'searchComplete', status: 'OK' });
 	} catch (error) {
-
+		chrome.runtime.sendMessage({ actionId: 'searchComplete', status: 'ERR' });
 	}
 }
 
-//establish connection to popup
-// chrome.runtime.onConnect.addListener(function (port) {
-// 	if (port.name === "popup") {
-// 		popupPort = port;
-// 		port.onDisconnect.addListener(function () {
-// 			popupPort = null;
-// 		});
-// 	}
-// });
-
-chrome.runtime.onMessage.addListener(async function (
+chrome.extension.onMessage.addListener(async function (
 	request,
 	sender,
 	sendResponse
 ) {
-	await sleep(5000);
-	manifestRequest = request.data;
-	console.log(manifestRequest, "目标页接收的值");
-
-	// 进行需求处理
-	await setManifestHtml();
-	await sleep(2000);
+	if (request.action === 'search') {
+		await setManifestHtml(request);
+		await sleep(2000);
+	}
 
 	//回调 （将有需要的数据传回popup.js
 	// setTimeout(() => {
@@ -169,14 +154,7 @@ function sleep(ms) {
 }
 
 function $(id) {
-	return new Promise((resolve, reject) => {
-		const element = document.getElementById(id);
-		if (element) {
-			resolve(element);
-		} else {
-			reject(new Error(`Element with id "${id}" not found`));
-		}
-	});
+	return document.getElementById(id);
 }
 
 function cSelector(selector) {
@@ -187,6 +165,15 @@ function cName(name) {
 	return document.getElementsByClassName(name)
 }
 
+async function clickLogin() {
+	try {
+		await mClick(await cSelector('a[href="/zh-hans/login/"]'));
+		await sleep(3000);
+		chrome.runtime.sendMessage({ actionId: 'loginPageLoadComplete', status: 'success' })
+	} catch (error) {
+		chrome.runtime.sendMessage({ actionId: 'loginPageLoadComplete', status: 'error' })
+	}
+}
 function isLoggedIn() {
 	const cookies = document.cookie.split(';');
 	for (let i = 0; i < cookies.length; i++) {
