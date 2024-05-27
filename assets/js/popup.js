@@ -4,7 +4,8 @@ FyApp.controller("popupController", [
   "$scope",
   "$http",
   function popupController($scope, $http) {
-    var zl_manifest_url = "https://www.baidu.com/"; //目标网址
+    // var zl_manifest_url = "https://www.baidu.com/"; //目标网址
+    var zl_manifest_url = "https://freightsmart.oocl.com/zh-hans/"
     $scope.working_tab_id = 0;
     $scope.pageLoaded = false;
     chrome.storage.local.get(["pageLoaded"], function (items) {
@@ -67,7 +68,7 @@ FyApp.controller("popupController", [
         url: "接口地址",
         type: "接口类型：GET/POST==",
         data: JSON.stringify({
-          results: "参数==",
+          results: request.results,
         }),
         contentType: "application/json",
         success: function (res) {
@@ -75,6 +76,7 @@ FyApp.controller("popupController", [
         },
         error: function (err) {
           //  接口响应失败，处理页面展示效果
+          console.log("Error: " + err)
         },
       });
     });
