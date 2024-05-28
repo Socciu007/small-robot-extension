@@ -4,8 +4,8 @@ FyApp.controller("popupController", [
   "$scope",
   "$http",
   function popupController($scope, $http) {
-    // var zl_manifest_url = "https://www.baidu.com/"; //目标网址
-    var zl_manifest_url = "https://freightsmart.oocl.com/digital/product/search-result"
+    var zl_manifest_url_0 = "https://freightsmart.oocl.com/digital/product/search-quote";
+    var zl_manifest_url = "https://freightsmart.oocl.com/digital/product/search-result";
     $scope.working_tab_id = 0;
     $scope.pageLoaded = false;
     chrome.storage.local.get(["pageLoaded"], function (items) {
@@ -30,6 +30,7 @@ FyApp.controller("popupController", [
       $scope.alert_message = { show: true, type: type, message: message };
       $scope.$applyAsync();
     };
+
     // 定义变量，供popup页面弹窗使用
     $scope.inputValue = "";
 
@@ -74,24 +75,33 @@ FyApp.controller("popupController", [
       sender,
       sendResponse
     ) {
-      if (request.actionId === 'crawlDataComplete') {
+      if (request.actionId === 'searchComplete') {
         if (request.status === 'OK') {
           $scope.showAlert("Success", "success");
-          // setTimeout(() => {
-          //   chrome.tabs.update($scope.working_tab_id, { url: 'https://freightsmart.oocl.com/digital/product/search-result' }, function () {
-          //     chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
-          //       if (tabId === $scope.working_tab_id && changeInfo.status === 'complete') {
-          //         chrome.tabs.onUpdated.removeListener(listener);
-          //         $scope.closeAlert();
-          //         $scope.pageLoaded = true;
-          //         chrome.storage.local.set({ pageLoaded: true });
-          //         $scope.runFile('loginPage');
-          //         $scope.$applyAsync();
-          //       }
-          //     });
-          //   });
-          // }, 1000);
+          setTimeout(() => {
+            chrome.tabs.update($scope.working_tab_id, { url: zl_manifest_url }, function () {
+              chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+                if (tabId === $scope.working_tab_id && changeInfo.status === 'complete') {
+
+                  chrome.tabs.onUpdated.removeListener(listener);
+
+                  $scope.closeAlert();
+                  $scope.pageLoaded = true;
+                  chrome.storage.local.set({ pageLoaded: true });
+
+                  $scope.runFile('crawlData');
+                  $scope.$applyAsync();
+                }
+              });
+            });
+          }, 1000);
           $scope.$applyAsync();
+        } else {
+          $scope.showAlert("Error", "danger");
+        }
+      } else if (request.actionId === 'crawlDataComplete') {
+        if (request.status === 'OK') {
+          //action
         } else {
           $scope.showAlert("Error", "danger");
         }
@@ -130,9 +140,9 @@ FyApp.controller("popupController", [
     });
 
     //判断目标页是否已经打开
-    $scope.runWorkingStage = function (tab) {
-      if (tab.url.indexOf(zl_manifest_url) === -1) {
-        chrome.tabs.update(tab.id, { url: zl_manifest_url });
+    $scope.runWorkingStage = function (tab, url) {
+      if (tab.url.indexOf(url) === -1) {
+        chrome.tabs.update(tab.id, { url: url });
       } else {
         $scope.closeAlert();
       }
@@ -144,7 +154,7 @@ FyApp.controller("popupController", [
         var tab = tabs[0];
         // 目标页在浏览器中的id
         $scope.working_tab_id = tab.id;
-        $scope.runWorkingStage(tab);
+        $scope.runWorkingStage(tab, zl_manifest_url_0);
       });
     });
   },

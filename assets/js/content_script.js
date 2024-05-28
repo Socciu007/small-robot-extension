@@ -3,12 +3,23 @@ var user = {
 	name: 'riverhe',
 	password: 'Fy112516',
 };
-async function setManifestHtml(request) {
+async function setManifestHtml() {
 	try {
 		const data = await crawlData();
 		return data;
 	} catch (error) {
-		chrome.runtime.sendMessage({ actionId: 'crawlDataComplete', status: 'ERR' });
+		return false
+	}
+}
+
+async function searchManifest() {
+	try {
+		const inputEle = await document.querySelectorAll('.right > .el-tooltip__trigger');
+		await inputValue(inputEle[0], 'Shanghai, China');
+		await sleep(2000);
+		await inputValue(inputEle[1], 'Singapore, Singapore');
+	} catch (error) {
+
 	}
 }
 
@@ -17,29 +28,17 @@ chrome.extension.onMessage.addListener(async function (
 	sender,
 	sendResponse
 ) {
-
-	// if (request.action === 'login') {
-	// 	console.log('login');
-	// 	const isLogin = await loginOOCL(request.data, user.password);
-	// 	await sleep(2000);
-	// 	if (!isLogin) {
-	// 		chrome.runtime.sendMessage({ actionId: 'loginComplete', status: 'ERR' });
-	// 		return;
-	// 	}
-	// 	sendResponse({ actionId: 'loginComplete', status: 'OK' })
-	// 	chrome.runtime.sendMessage({ actionId: 'loginComplete', status: 'OK' });
-	// }
-
-	// if (request.action === 'loginPage') {
-	// 	console.log('result');
-	// }
+	console.log('request: ' + request);
+	await sleep(2000);
+	if (request.action === 'search') {
+		await searchManifest();
+		console.log('search');
+	}
 
 	if (request.action === 'crawlData') {
 		const data = await setManifestHtml(request);
-		await sleep(2000);
 		console.log('data', data);
 		chrome.runtime.sendMessage({ actionId: 'crawlDataComplete', status: 'OK', data: data }, function (res) { });
-		sendResponse({ actionId: 'crawlDataComplete', status: 'OK', data: data });
 	}
 });
 
