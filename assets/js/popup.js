@@ -4,14 +4,17 @@ FyApp.controller("popupController", [
   "$scope",
   "$http",
   function popupController($scope, $http) {
-    var zl_manifest_url_0 = "https://freightsmart.oocl.com/digital/product/search-quote";
-    var zl_manifest_url = "https://freightsmart.oocl.com/digital/product/search-result";
+    var zl_manifest_url_0 =
+      "https://freightsmart.oocl.com/digital/product/search-quote";
+    var zl_manifest_url =
+      "https://freightsmart.oocl.com/digital/product/search-result";
     $scope.working_tab_id = 0;
     $scope.pageLoaded = false;
     chrome.storage.local.get(["pageLoaded"], function (items) {
       $scope.pageLoaded = !!items.pageLoaded;
     });
 
+    //notification popup
     $scope.alert_message = {
       show: false,
       type: "success",
@@ -35,38 +38,48 @@ FyApp.controller("popupController", [
     };
 
     $scope.search = function (action) {
-      setTimeout(() => {
-        chrome.tabs.sendMessage(
-          $scope.working_tab_id,
-          { action: action, data: $scope.inputValue },
-          (res) => {
-            if (chrome.runtime.lastError) {
-              console.error(chrome.runtime.lastError.message);
-              // $scope.showAlert("Message failed: " + chrome.runtime.lastError.message, "danger");
-            } else {
-              console.log("Message sent successfully", res);
-            }
+      // setTimeout(() => {
+      chrome.tabs.sendMessage(
+        $scope.working_tab_id,
+        { action: action, data: $scope.inputValue },
+        (res) => {
+          if (chrome.runtime.lastError) {
+            console.error(chrome.runtime.lastError.message);
+            $scope.showAlert(
+              "Message failed: " + chrome.runtime.lastError.message,
+              "danger"
+            );
+          } else {
+            console.success("Message sent successfully", res);
           }
-        );
-      }, 1000);
+        }
+      );
+      // }, 1000);
     };
 
     $scope.runFile = function (action) {
       if (!$scope.pageLoaded) {
         return $scope.showAlert("请等待页面完全加载再操作", "danger");
       } else {
-        chrome.tabs.executeScript($scope.working_tab_id, {
-          file: "assets/js/content_script.js",
-        }, function () {
-          if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError.message);
-            $scope.showAlert("Script injection failed: " + chrome.runtime.lastError.message, "danger");
-            $scope.$applyAsync();
-          } else {
-            $scope.hadRunning = true;
-            $scope.search(action);
+        chrome.tabs.executeScript(
+          $scope.working_tab_id,
+          {
+            file: "assets/js/content_script.js",
+          },
+          function () {
+            if (chrome.runtime.lastError) {
+              console.error(chrome.runtime.lastError.message);
+              $scope.showAlert(
+                "Script injection failed: " + chrome.runtime.lastError.message,
+                "danger"
+              );
+              $scope.$apply();
+            } else {
+              $scope.hadRunning = true;
+              $scope.search(action);
+            }
           }
-        });
+        );
       }
     };
 
@@ -76,53 +89,68 @@ FyApp.controller("popupController", [
       sender,
       sendResponse
     ) {
-      if (request.actionId === 'searchComplete') {
-        if (request.status === 'OK') {
+      const { actionId, status } = request;
+      if (actionId === "searchComplete") {
+        if (status === "OK") {
+          //notification success search
           $scope.showAlert("Success", "success");
-          setTimeout(() => {
-            chrome.tabs.update($scope.working_tab_id, { url: zl_manifest_url }, function () {
-              chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
-                if (tabId === $scope.working_tab_id && changeInfo.status === 'complete') {
+          //action next
+          setTimeout(async () => {
+            const activeTabURL = await getActiveTabURL();
 
-                  chrome.tabs.onUpdated.removeListener(listener);
-
-                  $scope.closeAlert();
-                  $scope.pageLoaded = true;
-                  chrome.storage.local.set({ pageLoaded: true });
-
-                  $scope.runFile('crawlData');
-                  $scope.$applyAsync();
+            $scope.working_tab_id = activeTabURL.id;
+            $scope.runWorkingStage(activeTabURL, zl_manifest_url);
+            // execute script
+            await chrome.tabs.executeScript(
+              $scope.working_tab_id,
+              {
+                file: "assets/js/content_script.js",
+              },
+              function () {
+                if (chrome.runtime.lastError) {
+                  console.error(chrome.runtime.lastError.message);
+                  $scope.showAlert(
+                    "Script injection failed: " +
+                      chrome.runtime.lastError.message,
+                    "danger"
+                  );
+                  $scope.$apply();
+                } else {
+                  $scope.hadRunning = true;
+                  chrome.tabs.sendMessage($scope.working_tab_id, {
+                    action: "crawlData",
+                  });
                 }
-              });
-            });
+              }
+            );
           }, 1000);
-          $scope.$applyAsync();
+          $scope.$apply();
         } else {
-          $scope.showAlert("Error", "danger");
+          $scope.showAlert("Error search", "danger");
         }
-      } else if (request.actionId === 'crawlDataComplete') {
-        if (request.status === 'OK') {
+      } else if (request.actionId === "crawlDataComplete") {
+        if (request.status === "OK") {
           //action
+          // 处理从content_script的回传数据，可将数据通过外部接口进行传输
+          $.ajax({
+            url: "接口地址",
+            type: "接口类型：GET/POST==",
+            data: JSON.stringify({
+              results: request.results,
+            }),
+            contentType: "application/json",
+            success: function (res) {
+              // 处理页面展示效果
+            },
+            error: function (err) {
+              //  接口响应失败，处理页面展示效果
+              console.log("Error: " + err);
+            },
+          });
         } else {
           $scope.showAlert("Error", "danger");
         }
       }
-      // 处理从content_script的回传数据，可将数据通过外部接口进行传输
-      $.ajax({
-        url: "接口地址",
-        type: "接口类型：GET/POST==",
-        data: JSON.stringify({
-          results: request.results,
-        }),
-        contentType: "application/json",
-        success: function (res) {
-          // 处理页面展示效果
-        },
-        error: function (err) {
-          //  接口响应失败，处理页面展示效果
-          console.log("Error: " + err)
-        },
-      });
     });
 
     // 监听页面是否加载完成
