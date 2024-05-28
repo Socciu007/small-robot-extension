@@ -10,7 +10,6 @@ FyApp.controller("popupController", [
     $scope.pageLoaded = false;
     chrome.storage.local.get(["pageLoaded"], function (items) {
       $scope.pageLoaded = !!items.pageLoaded;
-      $scope.$applyAsync();
     });
 
     $scope.alert_message = {
@@ -24,15 +23,16 @@ FyApp.controller("popupController", [
         type: "success",
         message: "没有错误",
       };
-      $scope.$applyAsync();
     };
     $scope.showAlert = function (message, type) {
       $scope.alert_message = { show: true, type: type, message: message };
-      $scope.$applyAsync();
     };
 
     // 定义变量，供popup页面弹窗使用
-    $scope.inputValue = "";
+    $scope.inputValue = {
+      startPort: "",
+      endPort: "",
+    };
 
     $scope.search = function (action) {
       setTimeout(() => {
@@ -43,7 +43,8 @@ FyApp.controller("popupController", [
             if (chrome.runtime.lastError) {
               console.error(chrome.runtime.lastError.message);
               // $scope.showAlert("Message failed: " + chrome.runtime.lastError.message, "danger");
-              $scope.$applyAsync();
+            } else {
+              console.log("Message sent successfully", res);
             }
           }
         );
@@ -131,12 +132,11 @@ FyApp.controller("popupController", [
         $scope.closeAlert();
         $scope.pageLoaded = true;
         chrome.storage.local.set({ pageLoaded: true });
-        $scope.$applyAsync();
       } else if (changeInfo.status === "loading") {
         $scope.pageLoaded = false;
         chrome.storage.local.set({ pageLoaded: false });
-        $scope.$applyAsync();
       }
+      $scope.$apply();
     });
 
     //判断目标页是否已经打开

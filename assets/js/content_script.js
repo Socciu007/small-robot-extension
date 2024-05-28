@@ -12,25 +12,39 @@ async function setManifestHtml() {
 	}
 }
 
-async function searchManifest() {
+async function search(port) {
 	try {
-		const inputEle = await document.querySelectorAll('.right > .el-tooltip__trigger');
-		const descEle = await document.querySelectorAll('el-input-number__increase');
+		await sleep(3000);
+		const inputEle = document.querySelectorAll('.right > .el-tooltip__trigger input');
+		const increaseEle = document.querySelectorAll('.el-input-number__increase');
 		const searchEle = await cSelector('button.search-button');
 
-		await inputValue(inputEle[0], 'Shanghai, China');
+		if (inputEle.length < 1 || increaseEle.length < 1 || !searchEle) {
+			return false;
+		}
+		//typing start and end port
+		inputValue(inputEle[0], port.startPort);//Shanghai, China
 		await sleep(2000);
-		await inputValue(inputEle[1], 'Singapore, Singapore');
+		mClick(inputEle[0]);
+		await sleep(2000);
+		await selectPort(port.startPort);
 		await sleep(2000);
 
-		await mClick(descEle[0]);
+		inputValue(inputEle[1], port.endPort);//Singapore, Singapore
+		await sleep(2000);
+		mClick(inputEle[1]);
+		await sleep(2000);
+		await selectPort(port.endPort);
+		// increase container size
+		mClick(increaseEle[0]);
+		await sleep(2000);
+		// click search button
+		mClick(searchEle);
 		await sleep(2000);
 
-		await mClick(searchEle);
-		await sleep(2000);
-
+		return true;
 	} catch (error) {
-
+		return false;
 	}
 }
 
@@ -39,18 +53,24 @@ chrome.extension.onMessage.addListener(async function (
 	sender,
 	sendResponse
 ) {
-	console.log('request: ' + request);
 	await sleep(2000);
+	manifestRequest = request.data;
+	var port = manifestRequest;
+
 	if (request.action === 'search') {
-		await searchManifest();
-		console.log('search');
+		const isSearch = await search(port);
+		if (isSearch) {
+			// sendResponse({ status: 'OK' });
+		} else {
+			// sendResponse({ status: 'ERROR' });
+		}
 	}
 
-	if (request.action === 'crawlData') {
-		const data = await setManifestHtml(request);
-		console.log('data', data);
-		chrome.runtime.sendMessage({ actionId: 'crawlDataComplete', status: 'OK', data: data }, function (res) { });
-	}
+	// if (request.action === 'crawlData') {
+	// 	const data = await setManifestHtml(request);
+	// 	console.log('data', data);
+	// 	chrome.runtime.sendMessage({ actionId: 'crawlDataComplete', status: 'OK', data: data }, function (res) { });
+	// }
 });
 
 // 鼠标点击事件
@@ -231,4 +251,14 @@ function crawlData() {
 
 function random(min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// 港口处理
+async function selectPort(port) {
+	const start = await cSelector('.search-result-item .title');
+	for (let i = 0; i < start.length; i++) {
+		if (start[i].innerText === port) {
+			return start[i];
+		}
+	}
 }

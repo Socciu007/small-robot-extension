@@ -10,14 +10,19 @@
     <div class="row">
         <div class="col-xs-10">
             <div class="form-group">
-                内容：
-                <input type="text" style="width: 80%;" name="" id="" ng-model="inputValue">
+                起运港:
+                <input type="text" style="width: 80%;" name="" id="" ng-model="inputValue.startPort">
+            </div>
+            <div class="form-group">
+                目的港:
+                <input type="text" style="width: 80%;" name="" id="" ng-model="inputValue.endPort">
             </div>
         </div>
         <div class="col-xs-2">
             <div class="form-group">
                 <button type="button" class="btn btn-primary" data-ng-click="runFile('search')">执行</button>
             </div>
+            
         </div>
     </div>
     <div class="col-xs-12">
