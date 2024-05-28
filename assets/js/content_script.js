@@ -27,7 +27,7 @@ chrome.extension.onMessage.addListener(async function (
 	// 	chrome.runtime.sendMessage({ actionId: 'loadLoginPageComplete', status: 'OK' });
 
 	// }
-	
+
 	// if (request.action === 'login') {
 	// 	console.log('login');
 	// 	const isLogin = await loginOOCL(request.data, user.password);

@@ -41,7 +41,7 @@ FyApp.controller("popupController", [
           (res) => {
             if (chrome.runtime.lastError) {
               console.error(chrome.runtime.lastError.message);
-              $scope.showAlert("Message failed: " + chrome.runtime.lastError.message, "danger");
+              // $scope.showAlert("Message failed: " + chrome.runtime.lastError.message, "danger");
               $scope.$applyAsync();
             }
           }
@@ -74,32 +74,26 @@ FyApp.controller("popupController", [
       sender,
       sendResponse
     ) {
-      if (request.actionId === 'loadLoginPageComplete') {
+      if (request.actionId === 'crawlDataComplete') {
         if (request.status === 'OK') {
           $scope.showAlert("Success", "success");
-          setTimeout(() => {
-            chrome.tabs.update($scope.working_tab_id, { url: 'https://freightsmart.oocl.com/digital/product/search-result' }, function () {
-              chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
-                if (tabId === $scope.working_tab_id && changeInfo.status === 'complete') {
-                  chrome.tabs.onUpdated.removeListener(listener);
-                  $scope.closeAlert();
-                  $scope.pageLoaded = true;
-                  chrome.storage.local.set({ pageLoaded: true });
-                  $scope.runFile('loginPage');
-                  $scope.$applyAsync();
-                }
-              });
-            });
-          }, 1000);
+          // setTimeout(() => {
+          //   chrome.tabs.update($scope.working_tab_id, { url: 'https://freightsmart.oocl.com/digital/product/search-result' }, function () {
+          //     chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+          //       if (tabId === $scope.working_tab_id && changeInfo.status === 'complete') {
+          //         chrome.tabs.onUpdated.removeListener(listener);
+          //         $scope.closeAlert();
+          //         $scope.pageLoaded = true;
+          //         chrome.storage.local.set({ pageLoaded: true });
+          //         $scope.runFile('loginPage');
+          //         $scope.$applyAsync();
+          //       }
+          //     });
+          //   });
+          // }, 1000);
           $scope.$applyAsync();
         } else {
           $scope.showAlert("Error", "danger");
-        }
-      } else if (request.actionId === 'loginComplete') {
-        if (request.status === 'success') {
-          $scope.showAlert("Next action completed successfully", "success");
-        } else {
-          $scope.showAlert("Next action failed", "danger");
         }
       }
       // 处理从content_script的回传数据，可将数据通过外部接口进行传输
