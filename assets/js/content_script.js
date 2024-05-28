@@ -1,27 +1,14 @@
 var manifestRequest = {};
+var user = {
+	name: 'riverhe',
+	password: 'Fy112516',
+};
 async function setManifestHtml(request) {
 	try {
-		const eleFrom = await $('el-id-6884-24')
-		console.log(eleFrom);
-		await inputValue(eleFrom, "Shanghai, China")
-		await sleep(2000);
-		//Shanghai, China
-		//Singapore, Singapore
-
-		const eleTo = await $('el-id-6884-25');
-		await inputValue(eleTo, "Singapore, Singapore");
-		await sleep(2000);
-
-		const eleQuantity = await $('el-id-6884-25');
-		await inputValue(eleQuantity, 1);
-		await sleep(2000);
-
-		const eleSearch = await cSelector('button.search-button');
-		await mClick(eleSearch);
-
-		chrome.runtime.sendMessage({ actionId: 'searchComplete', status: 'OK' });
+		const data = await crawlData();
+		return data;
 	} catch (error) {
-		chrome.runtime.sendMessage({ actionId: 'searchComplete', status: 'ERR' });
+		chrome.runtime.sendMessage({ actionId: 'crawlDataComplete', status: 'ERR' });
 	}
 }
 
@@ -30,37 +17,50 @@ chrome.extension.onMessage.addListener(async function (
 	sender,
 	sendResponse
 ) {
-	if (request.action === 'search') {
-		await setManifestHtml(request);
+	// if (request.action === 'loadLoginPage') {
+	// 	console.log('loadLoginPage');
+	// 	await sleep(2000);
+	// 	const selector = await cSelector('a[type="button"]');
+	// 	await mClick(selector);
+	// 	await sleep(2000);
+	// 	sendResponse({ actionId: 'loadLoginPageComplete', status: 'OK' })
+	// 	chrome.runtime.sendMessage({ actionId: 'loadLoginPageComplete', status: 'OK' });
+
+	// }
+	
+	// if (request.action === 'login') {
+	// 	console.log('login');
+	// 	const isLogin = await loginOOCL(request.data, user.password);
+	// 	await sleep(2000);
+	// 	if (!isLogin) {
+	// 		chrome.runtime.sendMessage({ actionId: 'loginComplete', status: 'ERR' });
+	// 		return;
+	// 	}
+	// 	sendResponse({ actionId: 'loginComplete', status: 'OK' })
+	// 	chrome.runtime.sendMessage({ actionId: 'loginComplete', status: 'OK' });
+	// }
+
+	// if (request.action === 'loginPage') {
+	// 	console.log('result');
+	// }
+
+	if (request.action === 'crawlData') {
+		const data = await setManifestHtml(request);
 		await sleep(2000);
+		console.log('data', data);
+		chrome.runtime.sendMessage({ actionId: 'crawlDataComplete', status: 'OK', data: data }, function (res) { });
+		sendResponse({ actionId: 'crawlDataComplete', status: 'OK', data: data });
 	}
-
-	//回调 （将有需要的数据传回popup.js
-	// setTimeout(() => {
-	// 	chrome.runtime.sendMessage(
-	// 		{ data: data },
-	// 		function (response) { }
-	// 	);
-	// }, 1000);
-
-	// sendResponse({ status: 200, message: "OK", data: data })
 });
 
 // 鼠标点击事件
 function mClick(dom) {
-	return new Promise((resolve, reject) => {
-		try {
-			var event = new MouseEvent("click", {
-				view: window,
-				bubbles: true,
-				cancelable: true,
-			});
-			dom.dispatchEvent(event);
-			resolve("Event dispatched successfully");
-		} catch (error) {
-			reject(error);
-		}
+	var event = new MouseEvent("click", {
+		view: window,
+		bubbles: true,
+		cancelable: true,
 	});
+	dom.dispatchEvent(event);
 }
 // 模拟键盘向下按键
 function mKeydown(dom) {
@@ -82,22 +82,16 @@ function mKeyUp(dom) {
 }
 // 模拟键盘回车按键
 function enterEvt(dom) {
-	return new Promise((resolve, reject) => {
-		try {
-			var enterEvt = new KeyboardEvent("keydown", {
-				bubbles: true,
-				cancelable: true,
-				key: "Enter",
-				code: "Enter",
-				keyCode: 13,
-				which: 13,
-			});
-			dom.dispatchEvent(enterEvt);
-			resolve("Event dispatched successfully");
-		} catch (error) {
-			reject(error);
-		}
+	var enterEvt = new KeyboardEvent("keydown", {
+		bubbles: true,
+		cancelable: true,
+		key: "Enter",
+		code: "Enter",
+		keyCode: 13,
+		which: 13,
 	});
+	dom.dispatchEvent(enterEvt);
+
 }
 
 function inputValue(dom, st) {
@@ -165,15 +159,6 @@ function cName(name) {
 	return document.getElementsByClassName(name)
 }
 
-async function clickLogin() {
-	try {
-		await mClick(await cSelector('a[href="/zh-hans/login/"]'));
-		await sleep(3000);
-		chrome.runtime.sendMessage({ actionId: 'loginPageLoadComplete', status: 'success' })
-	} catch (error) {
-		chrome.runtime.sendMessage({ actionId: 'loginPageLoadComplete', status: 'error' })
-	}
-}
 function isLoggedIn() {
 	const cookies = document.cookie.split(';');
 	for (let i = 0; i < cookies.length; i++) {
@@ -210,9 +195,9 @@ async function loginOOCL(userName, password) {
 				isLogin = false;
 			}
 		} else {
-			return isLogin
+			return isLogin;
 		}
-		return isLogin
+		return isLogin;
 
 	} catch (error) {
 		return isLogin;
@@ -222,10 +207,24 @@ async function loginOOCL(userName, password) {
 function crawlData() {
 	let data = {};
 	document.querySelectorAll("script").forEach((script) => script.remove());
+
+	//content search results
+	const selectorResults = document.querySelectorAll('.product-show-wrapper .product-content-card');
+	let resultSearch = [];
+	for (let i = 0; i < selectorResults.length; i++) {
+		resultSearch.push(selectorResults[i].innerText.split('\n'));
+	}
+
 	data = {
-		// html: document.documentElement.outerHTML,
-		text: document.body.innerText.split("\n"),
-		// content: cSelector("div#wrapper_wrapper").textContent.split("\n"),
+		search: {
+			from: document.querySelectorAll('.current-search .from-to .title')[0].innerText,
+			to: document.querySelectorAll('.current-search .from-to .title')[1].innerText,
+			cutoffDateStart: document.querySelectorAll('.current-search .departure .text')[0].innerText,
+			cutoffDateEnd: document.querySelectorAll('.current-search .departure .text')[2].innerText,
+			quantity: document.querySelectorAll('.current-search .containers-count .text')[0].innerText,
+			typeContainer: document.querySelectorAll('.current-search .containers-count .text')[2].innerText,
+		},
+		resultsSearch: resultSearch,
 	};
 	return data;
 }
