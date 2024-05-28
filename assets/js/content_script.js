@@ -17,16 +17,6 @@ chrome.extension.onMessage.addListener(async function (
 	sender,
 	sendResponse
 ) {
-	// if (request.action === 'loadLoginPage') {
-	// 	console.log('loadLoginPage');
-	// 	await sleep(2000);
-	// 	const selector = await cSelector('a[type="button"]');
-	// 	await mClick(selector);
-	// 	await sleep(2000);
-	// 	sendResponse({ actionId: 'loadLoginPageComplete', status: 'OK' })
-	// 	chrome.runtime.sendMessage({ actionId: 'loadLoginPageComplete', status: 'OK' });
-
-	// }
 
 	// if (request.action === 'login') {
 	// 	console.log('login');
