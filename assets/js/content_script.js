@@ -15,9 +15,20 @@ async function setManifestHtml() {
 async function searchManifest() {
 	try {
 		const inputEle = await document.querySelectorAll('.right > .el-tooltip__trigger');
+		const descEle = await document.querySelectorAll('el-input-number__increase');
+		const searchEle = await cSelector('button.search-button');
+
 		await inputValue(inputEle[0], 'Shanghai, China');
 		await sleep(2000);
 		await inputValue(inputEle[1], 'Singapore, Singapore');
+		await sleep(2000);
+
+		await mClick(descEle[0]);
+		await sleep(2000);
+
+		await mClick(searchEle);
+		await sleep(2000);
+
 	} catch (error) {
 
 	}
