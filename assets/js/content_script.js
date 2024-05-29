@@ -15,49 +15,27 @@ async function setManifestHtml() {
 async function search(port) {
 	try {
 		// find dom
-		let inputEle = document.querySelectorAll(
-			".right > .el-tooltip__trigger input"
-		);
+		const inputEle = cName('el-input__inner')
 		const searchEle = await cSelector("button.search-button");
 		// check exist dom
 		if (inputEle.length < 1 || !searchEle) {
 			return false;
 		}
-
-		//typing start port
-		const focus = await focusOnInput(inputEle[0]);
-		console.log('focus', focus);
+		// typing start port
+		await inputDemo(inputEle[0], port.startPort)
 		await sleep(1000);
-
-		await clickElement(inputEle[0]);
-		await sleep(1000);
-
-		await inputTyping(inputEle[0], port.startPort, 500); //Shanghai, China
-		await sleep(2000);
-
-		await inputEle[0].focus();
-		await sleep(2000);
-		await clickElement(inputEle[0]);
-
-		// const selectStartPort = await selectPort(port.startPort);
-		// console.log(selectStartPort);
-		// await mClick(selectStartPort);
-		await sleep(2000);
 
 		// typing end port
-		await clickElement(inputEle[1]);
-		await sleep(2000);
-		await inputTyping(inputEle[1], port.endPort, 500); //Singapore, Singapore
-		await sleep(2000);
-		await clickElement(inputEle[1]);
-		await sleep(2000);
+		await inputDemo(inputEle[1], port.endPort); //Singapore, Singapore
+		await sleep(1000);
+
 		// const selectEndPort = await selectPort(port.endPort);
 		// selectEndPort.click();
 
-		// increase container size
-		const numberEle = document.querySelectorAll('.el-input-number .el-input__inner');
-		await inputTyping(numberEle[0]);
-		await sleep(2000);
+		// // increase container size
+		// const numberEle = document.querySelectorAll('.el-input-number .el-input__inner');
+		// await inputTyping(numberEle[0]);
+		// await sleep(2000);
 
 		// click search button
 		await clickElement(searchEle);
@@ -68,7 +46,51 @@ async function search(port) {
 		return false;
 	}
 }
+async function inputDemo(dom, value) {
+	const start = cName('el-input el-input--suffix input portDoorInput el-tooltip__trigger el-tooltip__trigger')[0]
+	start.click()
+	await sleep(1000)
+	await typeText(dom, value)
+}
 
+async function typeText(elementSelector, text) { //节点, 要赋值的内容
+	const inputElement = elementSelector
+	if (!inputElement) {
+		console.error(`Element with selector "${elementSelector}" not found.`);
+		return;
+	}
+	inputElement.click();
+
+	// wait for input flash
+	await new Promise(resolve => setTimeout(resolve, 1000));
+
+	// focus input
+	const focusEvent = new Event('focus', { bubbles: true });
+	inputElement.dispatchEvent(focusEvent);
+	for (let i = 0; i < text.length; i++) {
+		const char = text[i];
+		const event = new KeyboardEvent('keydown', {
+			key: char,
+			code: char.charCodeAt(0),
+		});
+
+		inputElement.value += char;
+		inputElement.dispatchEvent(event);
+	}
+
+	// handle change input value 
+	const inputEvent = new Event('input', { bubbles: true });
+	inputElement.dispatchEvent(inputEvent);
+	await sleep(2000);
+
+	// select option of menu
+	const option = cName('search-result-item')[0];
+	await sleep(2000);
+	option.dispatchEvent(focusEvent);
+	await sleep(1000);
+
+	option.click();
+}
 chrome.runtime.onMessage.addListener(async function (
 	request,
 	sender,
@@ -98,18 +120,6 @@ chrome.runtime.onMessage.addListener(async function (
 		chrome.runtime.sendMessage({ actionId: 'crawlDataComplete', status: 'OK', data: data }, function (res) { });
 	}
 });
-
-//focus dom
-function focusOnInput(dom) {
-	return new Promise((resolve, reject) => {
-		if (dom) {
-			dom.focus();
-			resolve("Input focused");
-		} else {
-			reject(new Error("Input element not found"));
-		}
-	});
-}
 
 // 鼠标点击事件
 function mClick(dom) {
@@ -382,7 +392,7 @@ function random(min, max) {
 }
 
 // 港口处理
-function selectPort(port) {
+async function selectPort(port) {
 	const start = document.querySelectorAll(".search-result-item .title");
 	if (start.length > 0) {
 		for (let i = 0; i < start.length; i++) {

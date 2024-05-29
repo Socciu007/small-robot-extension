@@ -4,9 +4,9 @@ FyApp.controller("popupController", [
   "$scope",
   "$http",
   function popupController($scope, $http) {
-    var zl_manifest_url_0 =
-      "https://freightsmart.oocl.com/digital/product/search-quote";
     var zl_manifest_url =
+      "https://freightsmart.oocl.com/digital/product/search-quote";
+    var zl_manifest_url_0 =
       "https://freightsmart.oocl.com/digital/product/search-result";
     $scope.working_tab_id = 0;
     $scope.pageLoaded = false;
