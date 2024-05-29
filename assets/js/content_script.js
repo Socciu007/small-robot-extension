@@ -14,7 +14,7 @@ async function setManifestHtml() {
 
 async function search(port) {
 	try {
-		await sleep(3000);
+		// find dom
 		let inputEle = document.querySelectorAll(
 			".right > .el-tooltip__trigger input"
 		);
@@ -23,56 +23,42 @@ async function search(port) {
 		if (inputEle.length < 1 || !searchEle) {
 			return false;
 		}
-		//typing start and end port
-		await inputTyping(inputEle[0], port.startPort); //Shanghai, China
-		await sleep(5000);
-		// click search button
-		await clickElement(searchEle);
+
+		//typing start port
+		const focus = await focusOnInput(inputEle[0]);
+		console.log('focus', focus);
+		await sleep(1000);
+
+		await clickElement(inputEle[0]);
+		await sleep(1000);
+
+		await inputTyping(inputEle[0], port.startPort, 500); //Shanghai, China
 		await sleep(2000);
 
-		document.addEventListener('DOMContentLoaded', async () => {
-			const inputEle = document.querySelectorAll(
-				".right > .el-tooltip__trigger input"
-			);
-			if (increaseEle.length > 0) {
-				await clickElement(inputEle[0]);
-			} else {
-				console.error("Increase button not found");
-			}
-		});
-		// await clickElement(inputEle[0]);
-
-		console.log('oke');
-		// increase container size
-		// const increaseEle = document.querySelectorAll(".el-input-number");
-		// await inputTyping(increaseEle[0], 1, 500);
-		// await sleep(2000);
-
-		inputEle = await cSelector(
-			".right > .el-tooltip__trigger input"
-		);
-		// const test = await mouseDown(inputEle[0]);
-		// await sleep(5000);
-		// console.log('search', test);
-
-		const test1 = await clickElement(inputEle);
-		await sleep(5000);
-		console.log('search', test1);
+		await inputEle[0].focus();
+		await sleep(2000);
+		await clickElement(inputEle[0]);
 
 		// const selectStartPort = await selectPort(port.startPort);
 		// console.log(selectStartPort);
 		// await mClick(selectStartPort);
-		// await sleep(2000);
+		await sleep(2000);
 
-		await inputTyping(inputEle[1], port.endPort); //Singapore, Singapore
+		// typing end port
+		await clickElement(inputEle[1]);
 		await sleep(2000);
-		mClick(inputEle[1]);
+		await inputTyping(inputEle[1], port.endPort, 500); //Singapore, Singapore
 		await sleep(2000);
-		const selectEndPort = await selectPort(port.endPort);
-		selectEndPort.click();
+		await clickElement(inputEle[1]);
+		await sleep(2000);
+		// const selectEndPort = await selectPort(port.endPort);
+		// selectEndPort.click();
+
 		// increase container size
-		await clickElement(increaseEle[0]);
+		const numberEle = document.querySelectorAll('.el-input-number .el-input__inner');
+		await inputTyping(numberEle[0]);
 		await sleep(2000);
+
 		// click search button
 		await clickElement(searchEle);
 		await sleep(2000);
@@ -83,7 +69,7 @@ async function search(port) {
 	}
 }
 
-chrome.extension.onMessage.addListener(async function (
+chrome.runtime.onMessage.addListener(async function (
 	request,
 	sender,
 	sendResponse
@@ -95,12 +81,12 @@ chrome.extension.onMessage.addListener(async function (
 		const isSearch = await search(manifestRequest);
 		if (isSearch) {
 			await chrome.runtime.sendMessage(
-				{ actionId: "searchComplete", status: "OK", data: data },
+				{ actionId: "searchComplete", status: "OK" },
 				function (res) { }
 			);
 		} else {
 			await chrome.runtime.sendMessage(
-				{ actionId: "searchComplete", status: "ERR", data: data },
+				{ actionId: "searchComplete", status: "ERR" },
 				function (res) { }
 			);
 		}
@@ -112,6 +98,18 @@ chrome.extension.onMessage.addListener(async function (
 	// 	chrome.runtime.sendMessage({ actionId: 'crawlDataComplete', status: 'OK', data: data }, function (res) { });
 	// }
 });
+
+//focus dom
+function focusOnInput(dom) {
+	return new Promise((resolve, reject) => {
+		if (dom) {
+			dom.focus();
+			resolve("Input focused");
+		} else {
+			reject(new Error("Input element not found"));
+		}
+	});
+}
 
 // 鼠标点击事件
 function mClick(dom) {
@@ -212,7 +210,7 @@ function inputValue(dom, st) {
 	dom.dispatchEvent(evt);
 }
 
-function inputTyping(dom, text, interval = 1000) {
+function inputTyping(dom, text, ms = 1000) {
 	return new Promise((resolve, reject) => {
 		if (!dom || !(dom instanceof HTMLElement)) {
 			return reject(new Error("Invalid DOM element"));
@@ -233,10 +231,10 @@ function inputTyping(dom, text, interval = 1000) {
 					which: char.charCodeAt(0),
 				});
 
-				dom.value += char; // Thêm ký tự vào giá trị của input
-				dom.dispatchEvent(keyEvent); // Kích hoạt sự kiện 'keydown'
+				dom.value += char;
+				dom.dispatchEvent(keyEvent);
 				index++;
-				setTimeout(typeNextCharacter, interval); // Chờ một khoảng thời gian trước khi gõ ký tự tiếp theo
+				setTimeout(typeNextCharacter, ms);
 			} else {
 				resolve("Typing simulation completed");
 			}
@@ -352,11 +350,15 @@ function random(min, max) {
 }
 
 // 港口处理
-async function selectPort(port) {
-	const start = await cSelector(".search-result-item .title");
-	for (let i = 0; i < start.length; i++) {
-		if (start[i].innerText === port) {
-			return start[i];
+function selectPort(port) {
+	const start = document.querySelectorAll(".search-result-item .title");
+	if (start.length > 0) {
+		for (let i = 0; i < start.length; i++) {
+			if (start[i].innerText === port) {
+				return start[i];
+			}
 		}
+	} else {
+		console.log("Error not found select");
 	}
 }
