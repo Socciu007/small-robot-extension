@@ -19,7 +19,7 @@ async function search(port) {
 			".right > .el-tooltip__trigger input"
 		);
 		const searchEle = await cSelector("button.search-button");
-
+		// check exist dom
 		if (inputEle.length < 1 || !searchEle) {
 			return false;
 		}
@@ -76,8 +76,8 @@ chrome.runtime.onMessage.addListener(async function (
 ) {
 	const { action, data } = request;
 
+	manifestRequest = data;
 	if (action === "search") {
-		manifestRequest = data;
 		const isSearch = await search(manifestRequest);
 		if (isSearch) {
 			await chrome.runtime.sendMessage(
@@ -92,11 +92,11 @@ chrome.runtime.onMessage.addListener(async function (
 		}
 	}
 
-	// if (request.action === 'crawlData') {
-	// 	const data = await setManifestHtml(request);
-	// 	console.log('data', data);
-	// 	chrome.runtime.sendMessage({ actionId: 'crawlDataComplete', status: 'OK', data: data }, function (res) { });
-	// }
+	if (request.action === 'crawlData') {
+		const data = await setManifestHtml(request);
+		console.log('data', data);
+		chrome.runtime.sendMessage({ actionId: 'crawlDataComplete', status: 'OK', data: data }, function (res) { });
+	}
 });
 
 //focus dom
@@ -310,15 +310,47 @@ async function loginOOCL(userName, password) {
 
 function crawlData() {
 	let data = {};
-	document.querySelectorAll("script").forEach((script) => script.remove());
+	let index = {
+		startPort: 0,
+		endPort: 3,
+		exportDate: 1,
+		tripCode: 0,
+		shipName: 0,
+		tripName: 0,
+		transPort: 2,
+		tripDuration: 0,
+		typeContainer: 0,
+		price: 0,
+	};
+
+
+	// document.querySelectorAll("script").forEach((script) => script.remove());
 
 	//content search results
 	const selectorResults = document.querySelectorAll(
 		".product-show-wrapper .product-content-card"
 	);
 	let resultSearch = [];
+	const startPort = manifestRequest.startPort;
+	const endPort = manifestRequest.endPort;
 	for (let i = 0; i < selectorResults.length; i++) {
-		resultSearch.push(selectorResults[i].innerText.split("\n"));
+		resultSearch.push({
+			startPort: startPort ? startPort : document.querySelectorAll(".product-show-wrapper .product-content-card .info-list .title.blod")[index.startPort].innerText,
+			endPort: endPort ? endPort : document.querySelectorAll(".product-show-wrapper .product-content-card .info-list .title.blod")[index.endPort].innerText,
+			exportDate: document.querySelectorAll(".product-show-wrapper .product-content-card .time-info > span:nth-child(1)")[index.exportDate].innerText,
+			tripCode: document.querySelectorAll(".product-show-wrapper .product-content-card .serviceCode")[i].innerText,
+			shipName: string,
+			tripName: string,
+			transPort: document.querySelectorAll(".product-show-wrapper .product-content-card .info-list .title.blod")[index.transPort].innerText,
+			tripDuration: string,
+			typeContainer: string,
+			price: number,
+		});
+
+		index.startPort += 4;
+		index.endPort += 4;
+		index.exportDate += 4;
+		index.transPort += 4;
 	}
 
 	data = {
