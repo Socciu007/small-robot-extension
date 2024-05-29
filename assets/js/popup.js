@@ -111,7 +111,7 @@ FyApp.controller("popupController", [
                   console.error(chrome.runtime.lastError.message);
                   $scope.showAlert(
                     "Script injection failed: " +
-                      chrome.runtime.lastError.message,
+                    chrome.runtime.lastError.message,
                     "danger"
                   );
                   $scope.$apply();
