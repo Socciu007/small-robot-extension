@@ -23,52 +23,90 @@ async function search(port) {
 		if (inputEle.length < 1 || !searchEle) {
 			return false;
 		}
-
+		await inputDemo(port.startPort)
 		//typing start port
-		const focus = await focusOnInput(inputEle[0]);
-		console.log('focus', focus);
-		await sleep(1000);
+		// const focus = await focusOnInput(inputEle[0]);
+		// console.log('focus', focus);
+		// await sleep(1000);
 
-		await clickElement(inputEle[0]);
-		await sleep(1000);
+		// await clickElement(inputEle[0]);
+		// await sleep(1000);
 
-		await inputTyping(inputEle[0], port.startPort, 500); //Shanghai, China
-		await sleep(2000);
+		// await inputTyping(inputEle[0], port.startPort, 500); //Shanghai, China
+		// await sleep(2000);
 
-		await inputEle[0].focus();
-		await sleep(2000);
-		await clickElement(inputEle[0]);
+		// await inputEle[0].focus();
+		// await sleep(2000);
+		// await clickElement(inputEle[0]);
 
-		// const selectStartPort = await selectPort(port.startPort);
-		// console.log(selectStartPort);
-		// await mClick(selectStartPort);
-		await sleep(2000);
+		// // const selectStartPort = await selectPort(port.startPort);
+		// // console.log(selectStartPort);
+		// // await mClick(selectStartPort);
+		// await sleep(2000);
 
-		// typing end port
-		await clickElement(inputEle[1]);
-		await sleep(2000);
-		await inputTyping(inputEle[1], port.endPort, 500); //Singapore, Singapore
-		await sleep(2000);
-		await clickElement(inputEle[1]);
-		await sleep(2000);
-		// const selectEndPort = await selectPort(port.endPort);
-		// selectEndPort.click();
+		// // typing end port
+		// await clickElement(inputEle[1]);
+		// await sleep(2000);
+		// await inputTyping(inputEle[1], port.endPort, 500); //Singapore, Singapore
+		// await sleep(2000);
+		// await clickElement(inputEle[1]);
+		// await sleep(2000);
+		// // const selectEndPort = await selectPort(port.endPort);
+		// // selectEndPort.click();
 
-		// increase container size
-		const numberEle = document.querySelectorAll('.el-input-number .el-input__inner');
-		await inputTyping(numberEle[0]);
-		await sleep(2000);
+		// // increase container size
+		// const numberEle = document.querySelectorAll('.el-input-number .el-input__inner');
+		// await inputTyping(numberEle[0]);
+		// await sleep(2000);
 
-		// click search button
-		await clickElement(searchEle);
-		await sleep(2000);
+		// // click search button
+		// await clickElement(searchEle);
+		// await sleep(2000);
 
 		return true;
 	} catch (error) {
 		return false;
 	}
 }
+async function inputDemo(value) { 
+	const start = cName('el-input el-input--suffix input portDoorInput el-tooltip__trigger el-tooltip__trigger')[0]
+	start.click()
+	await sleep(1000)
+	const startInput = cName('el-input__inner')[0]
+	await sleep(1000)
+	await typeText(startInput, value)
+}
 
+async function typeText(elementSelector, text) { //节点, 要赋值的内容
+	// const inputElement = document.querySelector(elementSelector);
+	const inputElement = elementSelector
+	if (!inputElement) {
+	  console.error(`Element with selector "${elementSelector}" not found.`);
+	  return;
+	}
+	inputElement.click();
+  
+	// 等待一段时间，以确保光标已经在输入框中闪烁
+	await new Promise(resolve => setTimeout(resolve, 100));
+  
+	// 创建一个 focus 事件并触发，以模拟光标在输入框中的焦点
+	const focusEvent = new Event('focus', { bubbles: true });
+	inputElement.dispatchEvent(focusEvent);
+	for (let i = 0; i < text.length; i++) {
+	  const char = text[i];
+	  const event = new KeyboardEvent('keydown', {
+		key: char,
+		code: char.charCodeAt(0),
+	  });
+  
+	  inputElement.value += char;
+	  inputElement.dispatchEvent(event);
+	}
+  
+	// 触发 input 事件以通知页面文本已更改
+	const inputEvent = new Event('input', { bubbles: true });
+	inputElement.dispatchEvent(inputEvent);
+  }
 chrome.runtime.onMessage.addListener(async function (
 	request,
 	sender,
