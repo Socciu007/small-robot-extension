@@ -68,6 +68,7 @@ FyApp.controller("popupController", [
     ) {
       //response from tabs
       const { actionId, status, data } = request;
+      console.log(data);
       if (actionId === "searchComplete") {
         if (status === "OK") {
           await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -81,7 +82,7 @@ FyApp.controller("popupController", [
             }
           );
 
-          $scope.runFile("crawlData");
+          $scope.search("crawlData");
 
           $scope.$apply();
         } else {
@@ -90,20 +91,26 @@ FyApp.controller("popupController", [
       } else if (request.actionId === "crawlDataComplete") {
         if (request.status === "OK") {
           // 处理从content_script的回传数据，可将数据通过外部接口进行传输
-          $.ajax({
-            url: "http://localhost:3000/moneyapi/createQuote",
-            type: "POST",
-            data: JSON.stringify({
-              results: data,
-            }),
-            contentType: "application/json",
-            success: function (res) {
-              if (res.status == "OK") {
-              } else {
-              }
-            },
-            error: function (err) {},
-          });
+          for (var i = 0; i < data.resultsSearch.length; i++) {
+            await $.ajax({
+              url: "http://localhost:3000/moneyapi/createQuote",
+              type: "POST",
+              data: JSON.stringify(data.resultsSearch[i]),
+              contentType: "application/json",
+              success: function (res) {
+                if (res.status === "OK") {
+                  console.log("Quote created successfully:", res);
+                } else {
+                  console.error("Error creating quote:", res.message);
+                }
+              },
+              error: function (err) {
+                console.error("AJAX error:", err);
+              },
+            });
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+
+          }
         } else {
           $scope.showAlert("Error crawl data", "danger");
         }
