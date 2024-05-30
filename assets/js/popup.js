@@ -38,876 +38,909 @@ FyApp.controller("popupController", [
       endPort: "",
     };
 
+    //start port
     $scope.startPort = [
-      { id: 0, nameEn: 'SHANGHAI', nameEnEB: 'SHANGHAI', name: 'Shanghai, China' },
-      { id: 1, nameEn: 'SHEKOU', nameEnEB: 'SHENZHEN', name: 'Shekou, Shenzhen, Guangdong, China' },
-      { id: 2, nameEn: 'YANTIAN', nameEnEB: 'SHENZHEN', name: 'Yantian, Shenzhen, Guangdong, China' },
-      { id: 3, nameEn: 'DALIAN', nameEnEB: 'DALIAN', name: 'Dalian, Dalian, Liaoning, China' },
-      { id: 4, nameEn: 'HUANGPU', nameEnEB: 'GUANGZHOU', name: 'Huangpu, Guangzhou, Guangdong, China' },
-      { id: 5, nameEn: 'NANSHA', nameEnEB: 'GUANGZHOU', name: 'Nansha, Guangzhou, Guangdong, China' },
-      { id: 6, nameEn: 'NINGBO', nameEnEB: 'NINGBO', name: 'Ningbo, Ningbo, Zhejiang, China' },
-      { id: 7, nameEn: 'QINGDAO', nameEnEB: 'QINGDAO', name: 'Qingdao, Qingdao, Shandong, China' },
-      { id: 8, nameEn: 'TAICANG', nameEnEB: 'TAICANG', name: 'Taicang, Suzhou, Jiangsu, China' },
-      { id: 9, nameEn: 'WUHAN', nameEnEB: 'WUHAN', name: 'Wuhan, Wuhan, Hubei, China' },
-      { id: 10, nameEn: 'XIAMEN', nameEnEB: 'XIAMEN', name: 'Xiamen, Xiamen, Fujian, China' },
-      { id: 11, nameEn: 'XINGANG', nameEnEB: 'TIANJIN', name: 'Xingang, Tianjin, China' },
-    ]
-    $scope.startIndex = '0'
+      { id: 0, nameEn: "SHANGHAI", nameEnEB: "SHANGHAI", name: "上海" },
+      { id: 1, nameEn: "SHEKOU", nameEnEB: "SHENZHEN", name: "深圳-蛇口" },
+      { id: 2, nameEn: "YANTIAN", nameEnEB: "SHENZHEN", name: "深圳-盐田" },
+      { id: 3, nameEn: "DALIAN", nameEnEB: "DALIAN", name: "大连" },
+      { id: 4, nameEn: "HUANGPU", nameEnEB: "GUANGZHOU", name: "广州-黄埔" },
+      { id: 5, nameEn: "NANSHA", nameEnEB: "GUANGZHOU", name: "广州-南沙" },
+      { id: 6, nameEn: "NINGBO", nameEnEB: "NINGBO", name: "宁波" },
+      { id: 7, nameEn: "QINGDAO", nameEnEB: "QINGDAO", name: "青岛" },
+      { id: 8, nameEn: "TAICANG", nameEnEB: "TAICANG", name: "太仓" },
+      { id: 9, nameEn: "WUHAN", nameEnEB: "WUHAN", name: "武汉" },
+      { id: 10, nameEn: "XIAMEN", nameEnEB: "XIAMEN", name: "厦门" },
+      { id: 11, nameEn: "XINGANG", nameEnEB: "TIANJIN", name: "天津-新港" },
+    ];
+    $scope.startPortIndex = "0";
 
-    $scope.routeLine = [
-      //Shanghai
+    $scope.route = [
       [
-        { value: 'Australian', id: 0 },
-        { value: 'SoutheastAsia', id: 1 },
-        { value: 'RedSea', id: 2 },
-        { value: 'European', id: 3 },
-        { value: 'IndiaPakistan', id: 4 },
-        { value: 'MiddleEast', id: 5 },
+        { value: "澳洲线", id: 0 },
+        { value: "东南亚线", id: 1 },
+        { value: "红海线", id: 2 },
+        { value: "欧洲线", id: 3 },
+        { value: "印巴线", id: 4 },
+        { value: "中东线", id: 5 },
       ],
-      // not Shanghai
       [
-        { value: 'African', id: 6 },
-        { value: 'RedSea', id: 7 },
-        { value: 'Canada', id: 8 },
-        { value: 'American', id: 9 },
-        { value: 'Japan', id: 10 },
-        { value: 'European', id: 11 },
-        { value: 'Mediterranean', id: 12 },
-        { value: 'Taiwan', id: 13 },
-        { value: 'NewZealand', id: 14 },
-        { value: 'MiddleEast', id: 15 },
-        { value: 'IndiaPakistan', id: 16 },
-      ]
-    ]
-    $scope.route = ''
+        { value: "非洲线", id: 6 },
+        { value: "红海线", id: 7 },
+        { value: "加拿大", id: 8 },
+        { value: "美国线", id: 9 },
+        { value: "日本线", id: 10 },
+        { value: "欧洲线", id: 11 },
+        { value: "地中海线", id: 12 },
+        { value: "台湾线", id: 13 },
+        { value: "新西兰", id: 14 },
+        { value: "中东线", id: 15 },
+        { value: "印巴线", id: 16 },
+      ],
+    ];
+    $scope.indexRoute = "0";
 
     $scope.endPort = [
-      // shanghai
-      [{
-        end: 'ADELAIDE',
-        endEB: 'ADELAIDE',
-        routeName: 'Australian',
-      },
-      {
-        end: 'BRISBANE',
-        endEB: 'BRISBANE',
-        routeName: 'Australian',
-      },
-      {
-        end: 'FREMANTLE',
-        endEB: 'FREMANTLE',
-        routeName: 'Australian',
-      },
-      {
-        end: 'MELBOURNE',
-        endEB: 'MELBOURNE',
-        routeName: 'Australian',
-      },
-      {
-        end: 'SYDNEY',
-        endEB: 'SYDNEY',
-        routeName: 'Australian',
-      },
-      ],
+      // 上海 6
       [
         {
-          end: 'BANGKOK',
-          endEB: 'BANGKOK',
-          routeName: 'SoutheastAsia',
-          name: ''
+          end: "ADELAIDE",
+          endEB: "ADELAIDE",
+          routeName: "澳洲线",
         },
         {
-          end: 'BATAM',
-          endEB: 'BATAM',
-          routeName: 'SoutheastAsia',
+          end: "BRISBANE",
+          endEB: "BRISBANE",
+          routeName: "澳洲线",
         },
         {
-          end: 'BELAWAN',
-          endEB: 'BELAWAN',
-          routeName: 'SoutheastAsia',
+          end: "FREMANTLE",
+          endEB: "FREMANTLE",
+          routeName: "澳洲线",
         },
         {
-          end: 'CEBU',
-          endEB: 'CEBU',
-          routeName: 'SoutheastAsia',
+          end: "MELBOURNE",
+          endEB: "MELBOURNE",
+          routeName: "澳洲线",
         },
         {
-          end: 'HAI PHONG',
-          endEB: 'HAIPHONG',
-          routeName: 'SoutheastAsia',
-        },
-        {
-          end: 'Ho Chi Minh',
-          endEB: 'HOCHIMINH',
-          routeName: 'SoutheastAsia',
-        },
-        {
-          end: 'JAKARTA',
-          endEB: 'JAKARTA',
-          routeName: 'SoutheastAsia',
-        },
-        {
-          end: 'LAEM CHABANG',
-          endEB: 'LAEM CHABANG',
-          routeName: 'SoutheastAsia',
-        },
-        {
-          end: 'LAT KRABANG',
-          endEB: 'LAT KRABANG',
-          routeName: 'SoutheastAsia',
-        },
-        {
-          end: 'MANILA',
-          endEB: 'MANILA',
-          routeName: 'SoutheastAsia',
-        },
-        {
-          end: 'PASIR GUDANG',
-          endEB: 'PASIR GUDANG',
-          routeName: 'SoutheastAsia',
-        },
-        {
-          end: 'PENANG',
-          endEB: 'PENANG',
-          routeName: 'SoutheastAsia',
-        }
-        , {
-          end: 'PERAWANG',
-          endEB: 'PERAWANG',
-          routeName: 'SoutheastAsia',
-        }
-        , {
-          end: 'PHNOM PENH',
-          endEB: 'PHNOM PENH',
-          routeName: 'SoutheastAsia',
-        },
-        {
-          end: 'SEMARANG',
-          endEB: 'SEMARANG',
-          routeName: 'SoutheastAsia',
-          name: 'Semarang, Jawa Tengah, Indonesia'
-        }, {
-          end: 'SIHANOUKVILLE',
-          endEB: 'SIHANOUKVILLE',
-          routeName: 'SoutheastAsia',
-          name: 'Sihanoukville, Sihanoukville, Cambodia'
-        },
-        {
-          end: 'SINGAPORE',
-          endEB: 'SINGAPORE',
-          routeName: 'SoutheastAsia',
-          name: 'Singapore, Singapore'
-        },
-        {
-          end: 'SURABAYA',
-          endEB: 'SURABAYA',
-          routeName: 'SoutheastAsia',
-        }, {
-          end: 'TANJUNG PELEPAS',
-          endEB: 'TANJUNG PELEPAS',
-          routeName: 'SoutheastAsia',
-        }, {
-          end: 'YANGON',
-          endEB: 'YANGON',
-          routeName: 'SoutheastAsia',
-        },
-        {
-          end: 'port klang',
-          endEB: 'PORT KELANG',
-          routeName: 'SoutheastAsia'
-        }
-      ],
-      [
-        {
-          end: 'JEDDAH',
-          endEB: 'JEDDAH',
-          routeName: 'RedSea',
-        },
-        {
-          end: 'SOKHNA',
-          endEB: 'SOKHNA',
-          routeName: 'RedSea',
-        },
-        {
-          end: 'DJIBOUTI',
-          endEB: 'DJIBOUTI',
-          routeName: 'RedSea',
-        },
-        {
-          end: 'AQABA',
-          endEB: 'AQABA',
-          routeName: 'RedSea',
+          end: "SYDNEY",
+          endEB: "SYDNEY",
+          routeName: "澳洲线",
         },
       ],
       [
+        // {
+        //   end: 'BANGKOK',
+        //   endEB:'BANGKOK',
+        //   routeName: '东南亚线',
+        //  },
+        //  {
+        //   end: 'BATAM',
+        //   endEB:'BATAM',
+        //   routeName: '东南亚线',
+        //  },
+        //  {
+        //   end: 'BELAWAN',
+        //   endEB:'BELAWAN',
+        //   routeName: '东南亚线',
+        //  },
+        //  {
+        //   end: 'CEBU',
+        //   endEB:'CEBU',
+        //   routeName: '东南亚线',
+        //  },
+        // {
+        //   end: 'HAI PHONG',
+        //   endEB:'HAIPHONG',
+        //   routeName: '东南亚线',
+        // },
         {
-          end: 'ANTWERP',
-          endEB: 'ANTWERP',
-          routeName: 'European',
+          end: "Ho Chi Minh",
+          endEB: "HOCHIMINH",
+          routeName: "东南亚线",
+        },
+        // {
+        //   end: 'JAKARTA',
+        //   endEB:'JAKARTA',
+        //   routeName: '东南亚线',
+        //  },
+        //  {
+        //   end: 'LAEM CHABANG',
+        //   endEB:'LAEM CHABANG',
+        //   routeName: '东南亚线',
+        //  },
+        //  {
+        //   end: 'LAT KRABANG',
+        //   endEB:'LAT KRABANG',
+        //   routeName: '东南亚线',
+        //  },
+        // {
+        //   end: 'MANILA',
+        //   endEB:'MANILA',
+        //   routeName: '东南亚线',
+        // },
+        // {
+        //   end: 'PASIR GUDANG',
+        //   endEB:'PASIR GUDANG',
+        //   routeName: '东南亚线',
+        //  },
+        // {
+        //   end: 'PENANG',
+        //   endEB:'PENANG',
+        //   routeName: '东南亚线',
+        //  }
+        //  ,{
+        //   end: 'PERAWANG',
+        //   endEB:'PERAWANG',
+        //   routeName: '东南亚线',
+        //  }
+        // , {
+        //   end: 'PHNOM PENH',
+        //   endEB:'PHNOM PENH',
+        //   routeName: '东南亚线',
+        // },
+        // {
+        //   end: 'SEMARANG',
+        //   endEB:'SEMARANG',
+        //   routeName: '东南亚线',
+        //  },{
+        //   end: 'SIHANOUKVILLE',
+        //   endEB:'SIHANOUKVILLE',
+        //   routeName: '东南亚线',
+        //  },
+        // {
+        //   end: 'SINGAPORE',
+        //   endEB:'SINGAPORE',
+        //   routeName: '东南亚线',
+        // },
+        // {
+        //   end: 'SURABAYA',
+        //   endEB:'SURABAYA',
+        //   routeName: '东南亚线',
+        //  },{
+        //   end: 'TANJUNG PELEPAS',
+        //   endEB:'TANJUNG PELEPAS',
+        //   routeName: '东南亚线',
+        //  },{
+        //   end: 'YANGON',
+        //   endEB:'YANGON',
+        //   routeName: '东南亚线',
+        // },
+        // {
+        //   end: 'port klang',
+        //   endEB: 'PORT KELANG',
+        //   routeName: '东南亚线'
+        //  }
+      ],
+      [
+        {
+          end: "JEDDAH",
+          endEB: "JEDDAH",
+          routeName: "红海线",
         },
         {
-          end: 'DUNKERQUE',
-          endEB: 'DUNKERQUE',
-          routeName: 'European',
+          end: "SOKHNA",
+          endEB: "SOKHNA",
+          routeName: "红海线",
         },
         {
-          end: 'FELIXSTOWE',
-          endEB: 'FELIXSTOWE',
-          routeName: 'European',
+          end: "DJIBOUTI",
+          endEB: "DJIBOUTI",
+          routeName: "红海线",
         },
         {
-          end: 'GDANSK',
-          endEB: 'GDANSK',
-          routeName: 'European',
-        },
-        {
-          end: 'HAMBURG',
-          endEB: 'HAMBURG',
-          routeName: 'European',
-        }, {
-          end: 'LE HAVRE',
-          endEB: 'LE HAVRE',
-          routeName: 'European',
-        },
-        {
-          end: 'ROTTERDAM',
-          endEB: 'ROTTERDAM',
-          routeName: 'European',
-        }, {
-          end: 'SOUTHAMPTON',
-          endEB: 'SOUTHAMPTON',
-          routeName: 'European',
-        }, {
-          end: 'ZEEBRUGGE',
-          endEB: 'ZEEBRUGGE',
-          routeName: 'European',
-        }, {
-          end: 'Sankt Peterburg',
-          endEB: 'ST.PETERSBURG',
-          routeName: 'European',
+          end: "AQABA",
+          endEB: "AQABA",
+          routeName: "红海线",
         },
       ],
       [
         {
-          end: 'BANGALORE',
-          endEB: 'BANGALORE',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'Kolkata',//
-          endEB: 'CALCUTTA',
-          routeName: 'IndiaPakistan',
+          end: "ANTWERP",
+          endEB: "ANTWERP",
+          routeName: "欧洲线",
         },
         {
-          end: 'CHENNAI',
-          endEB: 'CHENNAI',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'Chattogram',
-          endEB: 'CHITTAGONG',
-          routeName: 'IndiaPakistan',
+          end: "DUNKERQUE",
+          endEB: "DUNKERQUE",
+          routeName: "欧洲线",
         },
         {
-          end: 'kochi',
-          endEB: 'COCHIN',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'COLOMBO',
-          endEB: 'COLOMBO',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'HALDIA',
-          endEB: 'HALDIA',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'AHMEDABAD',//ICD AHMEDABAD
-          endEB: 'ICD AHMEDABAD',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'Vadodara',//ICD BARODA
-          endEB: 'ICD BARODA',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'BORKHEDI',//ICD BORKHEDI
-          endEB: 'ICD BORKHEDI',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'DADRI',//ICD DADRI
-          endEB: 'ICD DADRI',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'GARHI',
-          endEB: 'ICD GARHI HARSARU',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'HYDERABAD',
-          endEB: 'ICD HYDERABAD',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'KANPUR',
-          endEB: 'ICD KANPUR',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'LUDHIANA',
-          endEB: 'ICD LUDHIANA',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'MORADABAD',
-          endEB: 'ICD MORADABAD',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'NAGPUR',
-          endEB: 'ICD NAGPUR',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'TIHI',
-          endEB: 'ICD TIHI',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'KARACHI',
-          endEB: 'KARACHI',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'Kuwait',
-          endEB: 'KHATUWAS',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'MANDIDEEP',
-          endEB: 'MANDIDEEP',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'MONGLA',
-          endEB: 'MONGLA',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'MUNDRA',
-          endEB: 'MUNDRA',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'NHAVA SHEVA',
-          endEB: 'NHAVA SHEVA',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'SANAND',
-          endEB: 'SANAND',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'SONIPAT',
-          endEB: 'SONIPAT',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'TUMB',
-          endEB: 'TUMB',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'TUTICORIN',
-          endEB: 'TUTICORIN',
-          routeName: 'IndiaPakistan',
-        }, {
-          end: 'VISAKHAPATNAM',
-          endEB: 'VISAKHAPATNAM',
-          routeName: 'IndiaPakistan',
+          end: "FELIXSTOWE",
+          endEB: "FELIXSTOWE",
+          routeName: "欧洲线",
+        },
+        {
+          end: "GDANSK",
+          endEB: "GDANSK",
+          routeName: "欧洲线",
+        },
+        {
+          end: "HAMBURG",
+          endEB: "HAMBURG",
+          routeName: "欧洲线",
+        },
+        {
+          end: "LE HAVRE",
+          endEB: "LE HAVRE",
+          routeName: "欧洲线",
+        },
+        {
+          end: "ROTTERDAM",
+          endEB: "ROTTERDAM",
+          routeName: "欧洲线",
+        },
+        {
+          end: "SOUTHAMPTON",
+          endEB: "SOUTHAMPTON",
+          routeName: "欧洲线",
+        },
+        {
+          end: "ZEEBRUGGE",
+          endEB: "ZEEBRUGGE",
+          routeName: "欧洲线",
+        },
+        {
+          end: "Sankt Peterburg",
+          endEB: "ST.PETERSBURG",
+          routeName: "欧洲线",
+        },
+      ],
+      [
+        {
+          end: "BANGALORE",
+          endEB: "BANGALORE",
+          routeName: "印巴线",
+        },
+        {
+          end: "Kolkata", //
+          endEB: "CALCUTTA",
+          routeName: "印巴线",
+        },
+        {
+          end: "CHENNAI",
+          endEB: "CHENNAI",
+          routeName: "印巴线",
+        },
+        {
+          end: "Chattogram",
+          endEB: "CHITTAGONG",
+          routeName: "印巴线",
+        },
+        {
+          end: "kochi",
+          endEB: "COCHIN",
+          routeName: "印巴线",
+        },
+        {
+          end: "COLOMBO",
+          endEB: "COLOMBO",
+          routeName: "印巴线",
+        },
+        {
+          end: "HALDIA",
+          endEB: "HALDIA",
+          routeName: "印巴线",
+        },
+        {
+          end: "AHMEDABAD", //ICD AHMEDABAD
+          endEB: "ICD AHMEDABAD",
+          routeName: "印巴线",
+        },
+        {
+          end: "Vadodara", //ICD BARODA
+          endEB: "ICD BARODA",
+          routeName: "印巴线",
+        },
+        {
+          end: "BORKHEDI", //ICD BORKHEDI
+          endEB: "ICD BORKHEDI",
+          routeName: "印巴线",
+        },
+        {
+          end: "DADRI", //ICD DADRI
+          endEB: "ICD DADRI",
+          routeName: "印巴线",
+        },
+        {
+          end: "GARHI",
+          endEB: "ICD GARHI HARSARU",
+          routeName: "印巴线",
+        },
+        {
+          end: "HYDERABAD",
+          endEB: "ICD HYDERABAD",
+          routeName: "印巴线",
+        },
+        {
+          end: "KANPUR",
+          endEB: "ICD KANPUR",
+          routeName: "印巴线",
+        },
+        {
+          end: "LUDHIANA",
+          endEB: "ICD LUDHIANA",
+          routeName: "印巴线",
+        },
+        {
+          end: "MORADABAD",
+          endEB: "ICD MORADABAD",
+          routeName: "印巴线",
+        },
+        {
+          end: "NAGPUR",
+          endEB: "ICD NAGPUR",
+          routeName: "印巴线",
+        },
+        {
+          end: "TIHI",
+          endEB: "ICD TIHI",
+          routeName: "印巴线",
+        },
+        {
+          end: "KARACHI",
+          endEB: "KARACHI",
+          routeName: "印巴线",
+        },
+        {
+          end: "Kuwait",
+          endEB: "KHATUWAS",
+          routeName: "印巴线",
+        },
+        {
+          end: "MANDIDEEP",
+          endEB: "MANDIDEEP",
+          routeName: "印巴线",
+        },
+        {
+          end: "MONGLA",
+          endEB: "MONGLA",
+          routeName: "印巴线",
+        },
+        {
+          end: "MUNDRA",
+          endEB: "MUNDRA",
+          routeName: "印巴线",
+        },
+        {
+          end: "NHAVA SHEVA",
+          endEB: "NHAVA SHEVA",
+          routeName: "印巴线",
+        },
+        {
+          end: "SANAND",
+          endEB: "SANAND",
+          routeName: "印巴线",
+        },
+        {
+          end: "SONIPAT",
+          endEB: "SONIPAT",
+          routeName: "印巴线",
+        },
+        {
+          end: "TUMB",
+          endEB: "TUMB",
+          routeName: "印巴线",
+        },
+        {
+          end: "TUTICORIN",
+          endEB: "TUTICORIN",
+          routeName: "印巴线",
+        },
+        {
+          end: "VISAKHAPATNAM",
+          endEB: "VISAKHAPATNAM",
+          routeName: "印巴线",
         },
         // {
         //   end: '新德里',
         //   endEB:'ICD FARIDABAD',
-        //   routeName: 'IndiaPakistan',
+        //   routeName: '印巴线',
         // },
       ],
       [
         {
-          end: 'ABU DHABI',
-          endEB: 'ABU DHABI',
-          routeName: 'MiddleEast',
+          end: "ABU DHABI",
+          endEB: "ABU DHABI",
+          routeName: "中东线",
         },
         {
-          end: 'AJMAN',
-          endEB: 'AJMAN',
-          routeName: 'MiddleEast',
+          end: "AJMAN",
+          endEB: "AJMAN",
+          routeName: "中东线",
         },
+        ,
         // {
         //   end: 'BAHRAIN',
         //   endEB:'BAHRAIN',
-        //   routeName: 'MiddleEast',
+        //   routeName: '中东线',
         //  }
-        , {
-          end: 'BASRAH',
-          endEB: 'BASRAH',
-          routeName: 'MiddleEast',
+        {
+          end: "BASRAH",
+          endEB: "BASRAH",
+          routeName: "中东线",
         },
         {
-          end: 'DAMMAM',
-          endEB: 'DAMMAM',
-          routeName: 'MiddleEast',
-        }, {
-          end: 'HAMAD',
-          endEB: 'HAMAD',
-          routeName: 'MiddleEast',
-        }, {
-          end: 'JEBEL ALI',
-          endEB: 'JEBEL ALI',
-          routeName: 'MiddleEast',
-        }, {
-          end: 'KUWAIT',
-          endEB: 'KUWAIT',
-          routeName: 'MiddleEast',
-        }, {
-          end: 'Riyad',
-          endEB: 'RIYADH',
-          routeName: 'MiddleEast',
-        }, {
-          end: 'SHARJAH',
-          endEB: 'SHARJAH',
-          routeName: 'MiddleEast',
-        }, {
-          end: 'SOHAR',
-          endEB: 'SOHAR',
-          routeName: 'MiddleEast',
-        }, {
-          end: 'UMM QASR',
-          endEB: 'UMM QASR',
-          routeName: 'MiddleEast',
-        },
-      ],
-      // Not shanghai
-      [
-        {
-          end: 'MOMBASA',
-          endEB: 'MOMBASA',
-          routeName: 'African',
+          end: "DAMMAM",
+          endEB: "DAMMAM",
+          routeName: "中东线",
         },
         {
-          end: 'TEMA',
-          endEB: 'TEMA',
-          routeName: 'African',
+          end: "HAMAD",
+          endEB: "HAMAD",
+          routeName: "中东线",
         },
         {
-          end: 'LOME',
-          endEB: 'LOME',
-          routeName: 'African',
+          end: "JEBEL ALI",
+          endEB: "JEBEL ALI",
+          routeName: "中东线",
         },
         {
-          end: 'CAPE TOWN',
-          endEB: 'CAPE TOWN',
-          routeName: 'African',
+          end: "KUWAIT",
+          endEB: "KUWAIT",
+          routeName: "中东线",
         },
         {
-          end: 'COTONOU',
-          endEB: 'COTONOU',
-          routeName: 'African',
+          end: "Riyad",
+          endEB: "RIYADH",
+          routeName: "中东线",
         },
         {
-          end: 'ABIDJAN',
-          endEB: 'ABIDJAN',
-          routeName: 'African',
+          end: "SHARJAH",
+          endEB: "SHARJAH",
+          routeName: "中东线",
         },
         {
-          end: 'ONNE',
-          endEB: 'ONNE',
-          routeName: 'African',
+          end: "SOHAR",
+          endEB: "SOHAR",
+          routeName: "中东线",
         },
         {
-          end: 'TINCAN',
-          endEB: 'TIN CAN',
-          routeName: 'African',
-        },
-        {
-          end: 'APAPA',
-          endEB: 'APAPA',
-          routeName: 'African',
+          end: "UMM QASR",
+          endEB: "UMM QASR",
+          routeName: "中东线",
         },
       ],
+      // 非上海 10
       [
         {
-          end: 'PORT SUDAN',
-          endEB: 'PORT SUDAN',
-          routeName: 'RedSea',
+          end: "MOMBASA",
+          endEB: "MOMBASA",
+          routeName: "非洲线",
+        },
+        {
+          end: "TEMA",
+          endEB: "TEMA",
+          routeName: "非洲线",
+        },
+        {
+          end: "LOME",
+          endEB: "LOME",
+          routeName: "非洲线",
+        },
+        {
+          end: "CAPE TOWN",
+          endEB: "CAPE TOWN",
+          routeName: "非洲线",
+        },
+        {
+          end: "COTONOU",
+          endEB: "COTONOU",
+          routeName: "非洲线",
+        },
+        {
+          end: "ABIDJAN",
+          endEB: "ABIDJAN",
+          routeName: "非洲线",
+        },
+        {
+          end: "ONNE",
+          endEB: "ONNE",
+          routeName: "非洲线",
+        },
+        {
+          end: "TINCAN",
+          endEB: "TIN CAN",
+          routeName: "非洲线",
+        },
+        {
+          end: "APAPA",
+          endEB: "APAPA",
+          routeName: "非洲线",
         },
       ],
       [
         {
-          end: 'HALIFAX',
-          endEB: 'HALIFAX',
-          routeName: 'Canada',
+          end: "PORT SUDAN",
+          endEB: "PORT SUDAN",
+          routeName: "红海线",
+        },
+      ],
+      [
+        {
+          end: "HALIFAX",
+          endEB: "HALIFAX",
+          routeName: "加拿大",
         },
         {
-          end: 'TORONTO',
-          endEB: 'TORONTO',
-          routeName: 'Canada',
+          end: "TORONTO",
+          endEB: "TORONTO",
+          routeName: "加拿大",
         },
         {
-          end: 'VANCOUVER',
-          endEB: 'VANCOUVER,BC,CA',
-          routeName: 'Canada',
+          end: "VANCOUVER",
+          endEB: "VANCOUVER,BC,CA",
+          routeName: "加拿大",
         },
         {
-          end: 'PRINCE RUPERT',
-          endEB: 'PRINCE RUPERT',
-          routeName: 'Canada',
+          end: "PRINCE RUPERT",
+          endEB: "PRINCE RUPERT",
+          routeName: "加拿大",
         },
         // {
         //   end: 'MONTREAL',
         //   endEB:'MONTREAL',
-        //   routeName: 'Canada',
+        //   routeName: '加拿大',
         // },
         {
-          end: 'EDMONTON',
-          endEB: 'EDMONTON',
-          routeName: 'Canada',
+          end: "EDMONTON",
+          endEB: "EDMONTON",
+          routeName: "加拿大",
         },
         {
-          end: 'CALGARY',
-          endEB: 'CALGARY',
-          routeName: 'Canada',
+          end: "CALGARY",
+          endEB: "CALGARY",
+          routeName: "加拿大",
         },
       ],
       [
         {
-          end: 'LOS ANGELES',
-          endEB: 'LOS ANGELES',
-          routeName: 'American',
+          end: "LOS ANGELES",
+          endEB: "LOS ANGELES",
+          routeName: "美国线",
         },
         {
-          end: 'AUCKLAND',
-          endEB: 'OAKLAND',
-          routeName: 'American',
+          end: "AUCKLAND",
+          endEB: "OAKLAND",
+          routeName: "美国线",
         },
         {
-          end: 'LONG BEACH',
-          endEB: 'LONG BEACH',
-          routeName: 'American',
+          end: "LONG BEACH",
+          endEB: "LONG BEACH",
+          routeName: "美国线",
         },
         {
-          end: 'SEATTLE',
-          endEB: 'SEATTLE,WA',
-          routeName: 'American',
+          end: "SEATTLE",
+          endEB: "SEATTLE,WA",
+          routeName: "美国线",
         },
         {
-          end: 'TACOMA',
-          endEB: 'TACOMA,WA',
-          routeName: 'American',
+          end: "TACOMA",
+          endEB: "TACOMA,WA",
+          routeName: "美国线",
         },
         {
-          end: 'NEW YORK',
-          endEB: 'NEW YORK,NY',
-          routeName: 'American',
+          end: "NEW YORK",
+          endEB: "NEW YORK,NY",
+          routeName: "美国线",
         },
         // {
         //   end: 'HOUSTON',
         //   endEB:'HOUSTON,TX',
-        //   routeName: 'American',
+        //   routeName: '美国线',
         // },
         // {
         //   end: 'SAVANNAH',
         //   endEB:'SAVANNAH,GA',
-        //   routeName: 'American',
+        //   routeName: '美国线',
         // },
         // {
         //   end: 'MIAMI',
         //   endEB:'MIAMI',
-        //   routeName: 'American',
+        //   routeName: '美国线',
         // },
         {
-          end: 'BALTIMORE',
-          endEB: 'BALTIMORE',
-          routeName: 'American',
+          end: "BALTIMORE",
+          endEB: "BALTIMORE",
+          routeName: "美国线",
         },
         // {
         //   end: 'NORFOLK',
         //   endEB:'NORFOLK,VA',
-        //   routeName: 'American',
+        //   routeName: '美国线',
         // },
         {
-          end: 'NEW ORLEANS',
-          endEB: 'NEW ORLEANS,LA',
-          routeName: 'American',
+          end: "NEW ORLEANS",
+          endEB: "NEW ORLEANS,LA",
+          routeName: "美国线",
         },
         {
-          end: 'MOBILE',
-          endEB: 'MOBILE,AL',
-          routeName: 'American',
+          end: "MOBILE",
+          endEB: "MOBILE,AL",
+          routeName: "美国线",
         },
         // {
         //   end: 'DALLAS',
         //   endEB:'DALLAS,TX',
-        //   routeName: 'American',
+        //   routeName: '美国线',
         // },
         {
-          end: 'BOSTON',
-          endEB: 'BOSTON',
-          routeName: 'American',
+          end: "BOSTON",
+          endEB: "BOSTON",
+          routeName: "美国线",
         },
         {
-          end: 'CHICAGO',
-          endEB: 'CHICAGO,IL',
-          routeName: 'American',
+          end: "CHICAGO",
+          endEB: "CHICAGO,IL",
+          routeName: "美国线",
         },
         // {
         //   end: 'CLEVELAND',
         //   endEB:'CLEVELAND,OH',
-        //   routeName: 'American',
+        //   routeName: '美国线',
         // },
       ],
       [
         {
-          end: 'YOKOHAMA',
-          endEB: 'YOKOHAMA',
-          routeName: 'Japan',
+          end: "YOKOHAMA",
+          endEB: "YOKOHAMA",
+          routeName: "日本线",
         },
         {
-          end: 'TOKYO',
-          endEB: 'TOKYO',
-          routeName: 'Japan',
+          end: "TOKYO",
+          endEB: "TOKYO",
+          routeName: "日本线",
         },
         {
-          end: 'OSAKA',
-          endEB: 'OSAKA',
-          routeName: 'Japan',
+          end: "OSAKA",
+          endEB: "OSAKA",
+          routeName: "日本线",
         },
         {
-          end: 'NAGOYA',
-          endEB: 'NAGOYA',
-          routeName: 'Japan',
+          end: "NAGOYA",
+          endEB: "NAGOYA",
+          routeName: "日本线",
         },
         {
-          end: 'KOBE',
-          endEB: 'KOBE',
-          routeName: 'Japan',
+          end: "KOBE",
+          endEB: "KOBE",
+          routeName: "日本线",
         },
         {
-          end: 'YOKKAICHI',
-          endEB: 'YOKKAICHI',
-          routeName: 'Japan',
+          end: "YOKKAICHI",
+          endEB: "YOKKAICHI",
+          routeName: "日本线",
         },
         {
-          end: 'MOJI',
-          endEB: 'MOJI',
-          routeName: 'Japan',
+          end: "MOJI",
+          endEB: "MOJI",
+          routeName: "日本线",
         },
         {
-          end: 'HAKATA',
-          endEB: 'HAKATA',
-          routeName: 'Japan',
+          end: "HAKATA",
+          endEB: "HAKATA",
+          routeName: "日本线",
         },
         {
-          end: 'MIZUSHIMA',
-          endEB: 'MIZUSHIMA',
-          routeName: 'Japan',
+          end: "MIZUSHIMA",
+          endEB: "MIZUSHIMA",
+          routeName: "日本线",
         },
         {
-          end: 'IMABARI',
-          endEB: 'IMABARI',
-          routeName: 'Japan',
+          end: "IMABARI",
+          endEB: "IMABARI",
+          routeName: "日本线",
         },
         {
-          end: 'HIROSHIMA',
-          endEB: 'HIROSHIMA',
-          routeName: 'Japan',
-        },
-      ],
-      [
-        {
-          end: 'WILHELMSHAVEN',
-          endEB: 'WILHELMSHAVEN',
-          routeName: 'European',
-        },
-        {
-          end: 'FELIXSTOWE',
-          endEB: 'FELIXSTOWE',
-          routeName: 'European',
-        },
-        {
-          end: 'HELSINKI',
-          endEB: 'HELSINKI',
-          routeName: 'European',
-        },
-        {
-          end: 'GOTHENBURG',
-          endEB: 'GOTHENBURG',
-          routeName: 'European',
-        },
-        {
-          end: 'FOS SUR MER',
-          endEB: 'FOS SUR MER',
-          routeName: 'European',
-        },
-        {
-          end: 'TRIESTE',
-          endEB: 'TRIESTE',
-          routeName: 'European',
-        },
-        {
-          end: 'RIJEKA',
-          endEB: 'RIJEKA',
-          routeName: 'European',
-        },
-        {
-          end: 'KOPER',
-          endEB: 'KOPER',
-          routeName: 'European',
-        },
-        {
-          end: 'HAMBURG',
-          endEB: 'HAMBURG',
-          routeName: 'European',
-        },
-        {
-          end: 'GDANSK',
-          endEB: 'GDANSK',
-          routeName: 'European',
+          end: "HIROSHIMA",
+          endEB: "HIROSHIMA",
+          routeName: "日本线",
         },
       ],
       [
         {
-          end: 'GENOVA',
-          endEB: 'GENOVA',
-          routeName: 'Mediterranean',
+          end: "WILHELMSHAVEN",
+          endEB: "WILHELMSHAVEN",
+          routeName: "欧洲线",
         },
         {
-          end: 'BARCELONA',
-          endEB: 'BARCELONA',
-          routeName: 'Mediterranean',
+          end: "FELIXSTOWE",
+          endEB: "FELIXSTOWE",
+          routeName: "欧洲线",
+        },
+        {
+          end: "HELSINKI",
+          endEB: "HELSINKI",
+          routeName: "欧洲线",
+        },
+        {
+          end: "GOTHENBURG",
+          endEB: "GOTHENBURG",
+          routeName: "欧洲线",
+        },
+        {
+          end: "FOS SUR MER",
+          endEB: "FOS SUR MER",
+          routeName: "欧洲线",
+        },
+        {
+          end: "TRIESTE",
+          endEB: "TRIESTE",
+          routeName: "欧洲线",
+        },
+        {
+          end: "RIJEKA",
+          endEB: "RIJEKA",
+          routeName: "欧洲线",
+        },
+        {
+          end: "KOPER",
+          endEB: "KOPER",
+          routeName: "欧洲线",
+        },
+        {
+          end: "HAMBURG",
+          endEB: "HAMBURG",
+          routeName: "欧洲线",
+        },
+        {
+          end: "GDANSK",
+          endEB: "GDANSK",
+          routeName: "欧洲线",
+        },
+      ],
+      [
+        {
+          end: "GENOVA",
+          endEB: "GENOVA",
+          routeName: "地中海线",
+        },
+        {
+          end: "BARCELONA",
+          endEB: "BARCELONA",
+          routeName: "地中海线",
         },
         // {
         //   end: 'VALENCIA',
         //   endEB:'VALENCIA',
-        //   routeName: 'Mediterranean',
+        //   routeName: '地中海线',
         // },
         {
-          end: 'LA SPEZIA',
-          endEB: 'LA SPEZIA',
-          routeName: 'Mediterranean',
+          end: "LA SPEZIA",
+          endEB: "LA SPEZIA",
+          routeName: "地中海线",
         },
         {
-          end: 'IZMIT',
-          endEB: 'IZMIT',
-          routeName: 'Mediterranean',
+          end: "IZMIT",
+          endEB: "IZMIT",
+          routeName: "地中海线",
         },
         {
-          end: 'ISTANBUL',
-          endEB: 'ISTANBUL',
-          routeName: 'Mediterranean',
+          end: "ISTANBUL",
+          endEB: "ISTANBUL",
+          routeName: "地中海线",
         },
         {
-          end: 'PIRAEUS',
-          endEB: 'PIRAEUS',
-          routeName: 'Mediterranean',
+          end: "PIRAEUS",
+          endEB: "PIRAEUS",
+          routeName: "地中海线",
         },
         {
-          end: 'MARSAXLOKK',
-          endEB: 'MARSAXLOKK',
-          routeName: 'Mediterranean',
+          end: "MARSAXLOKK",
+          endEB: "MARSAXLOKK",
+          routeName: "地中海线",
         },
         {
-          end: 'PORT SAID',
-          endEB: 'PORT SAID',
-          routeName: 'Mediterranean',
+          end: "PORT SAID",
+          endEB: "PORT SAID",
+          routeName: "地中海线",
         },
       ],
       [
         {
-          end: 'KEELUNG',
-          endEB: 'KEELUNG',
-          routeName: 'Taiwan',
+          end: "KEELUNG",
+          endEB: "KEELUNG",
+          routeName: "台湾线",
         },
         {
-          end: 'KAOHSIUNG',
-          endEB: 'KAOHSIUNG',
-          routeName: 'Taiwan',
+          end: "KAOHSIUNG",
+          endEB: "KAOHSIUNG",
+          routeName: "台湾线",
         },
         {
-          end: 'TAICHUNG',
-          endEB: 'TAICHUNG',
-          routeName: 'Taiwan',
+          end: "TAICHUNG",
+          endEB: "TAICHUNG",
+          routeName: "台湾线",
         },
       ],
       [
         // {
         //   end: 'WELLINGTON',
         //   endEB:'WELLINGTON',
-        //   routeName: 'NewZealand',
+        //   routeName: '新西兰',
         // },
         {
-          end: 'TAURANGA',
-          endEB: 'TAURANGA',
-          routeName: 'NewZealand',
+          end: "TAURANGA",
+          endEB: "TAURANGA",
+          routeName: "新西兰",
         },
         {
-          end: 'NAPIER',
-          endEB: 'NAPIER',
-          routeName: 'NewZealand',
+          end: "NAPIER",
+          endEB: "NAPIER",
+          routeName: "新西兰",
         },
         {
-          end: 'LYTTELTON',
-          endEB: 'LYTTELTON',
-          routeName: 'NewZealand',
+          end: "LYTTELTON",
+          endEB: "LYTTELTON",
+          routeName: "新西兰",
         },
         {
-          end: 'AUCKLAND',
-          endEB: 'AUCKLAND',
-          routeName: 'NewZealand',
+          end: "AUCKLAND",
+          endEB: "AUCKLAND",
+          routeName: "新西兰",
         },
       ],
       [
         {
-          end: 'JEBEL ALI',
-          endEB: 'JEBEL ALI',
-          routeName: 'MiddleEast',
+          end: "JEBEL ALI",
+          endEB: "JEBEL ALI",
+          routeName: "中东线",
         },
         {
-          end: 'DAMMAM',
-          endEB: 'DAMMAM',
-          routeName: 'MiddleEast',
+          end: "DAMMAM",
+          endEB: "DAMMAM",
+          routeName: "中东线",
         },
         {
-          end: 'AJMAN',
-          endEB: 'AJMAN',
-          routeName: 'MiddleEast',
+          end: "AJMAN",
+          endEB: "AJMAN",
+          routeName: "中东线",
         },
         {
-          end: 'Ar Riyad',
-          endEB: 'RIYADH',
-          routeName: 'MiddleEast',
+          end: "Ar Riyad",
+          endEB: "RIYADH",
+          routeName: "中东线",
         },
         {
-          end: 'SHUAIBA',
-          endEB: 'SHUAIBA',
-          routeName: 'MiddleEast',
+          end: "SHUAIBA",
+          endEB: "SHUAIBA",
+          routeName: "中东线",
         },
         {
-          end: 'SHUWAIKH',
-          endEB: 'SHUWAIKH',
-          routeName: 'MiddleEast',
+          end: "SHUWAIKH",
+          endEB: "SHUWAIKH",
+          routeName: "中东线",
         },
       ],
       [
         {
-          end: 'MUNDRA',
-          endEB: 'MUNDRA',
-          routeName: 'IndiaPakistan',
+          end: "MUNDRA",
+          endEB: "MUNDRA",
+          routeName: "印巴线",
         },
         {
-          end: 'COLOMBO',
-          endEB: 'COLOMBO',
-          routeName: 'IndiaPakistan',
+          end: "COLOMBO",
+          endEB: "COLOMBO",
+          routeName: "印巴线",
         },
         {
-          end: 'DHAKA',
-          endEB: 'DHAKA',
-          routeName: 'IndiaPakistan',
+          end: "DHAKA",
+          endEB: "DHAKA",
+          routeName: "印巴线",
         },
         {
-          end: 'NHAVA SHEVA',
-          endEB: 'NHAVA SHEVA',
-          routeName: 'IndiaPakistan',
+          end: "NHAVA SHEVA",
+          endEB: "NHAVA SHEVA",
+          routeName: "印巴线",
         },
         {
-          end: 'PANGAON',
-          endEB: 'PANGAON',
-          routeName: 'IndiaPakistan',
+          end: "PANGAON",
+          endEB: "PANGAON",
+          routeName: "印巴线",
         },
-      ]
-    ]
-    $scope.valueEndPort = '0'
+      ],
+    ];
 
     $scope.runFile = function (action) {
       //  判断页面是否加载完成
@@ -922,18 +955,11 @@ FyApp.controller("popupController", [
       }
     };
 
-    $scope.search = function (action) {
+    $scope.search = function (action, req) {
       setTimeout(() => {
         chrome.tabs.sendMessage($scope.working_tab_id, {
           action: action,
-          data: {
-            startPort: $scope.startPort[$scope.startIndex].name,
-            routeName: $scope.startIndex == 0 ?
-              $scope.routeLine[0][$scope.route].value
-              :
-              $scope.routeLine[1][$scope.route].value,
-            endPort: $scope.valueEndPort
-          },
+          req: req,
         });
       }, 1000);
     };
@@ -988,7 +1014,6 @@ FyApp.controller("popupController", [
               },
             });
             await new Promise((resolve) => setTimeout(resolve, 3000));
-
           }
         } else {
           $scope.showAlert("Error crawl data", "danger");
