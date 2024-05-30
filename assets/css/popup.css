@@ -3,6 +3,17 @@ body { width:400px; height:150px; margin:10px !important; padding: 16px;}
 .input-small { width:158px; display:inline !important; }
 .input-large { width:320px; display:inline !important; }
 .select {
-    width: 150px;
-    height: 34px;
+    width: 80%;
+    height: 30px;
+    cursor: pointer;
+}
+.layout-select {
+    width: 100%;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    p {
+        margin: 0px !important;
+    }
 }

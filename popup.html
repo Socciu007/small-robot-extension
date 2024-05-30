@@ -10,13 +10,102 @@
     <div class="row">
         <div class="col-xs-10">
             <div class="form-group">
-                起运港:
-                <input type="text" style="width: 80%;" name="" id="" ng-model="inputValue.startPort">
+                <div class="layout-select">
+                    <p>起运港:</p>
+                    <!-- <input type="text" style="width: 80%;" name="" id="" ng-model="inputValue.startPort"> -->
+                    <select ng-model="startIndex" class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in startPort track by $index" value="{{item.id}}">
+                            {{item.name}}
+                        </option>
+                    </select>
+                </div>
+                <div class="layout-select">
+                    <p>航线:</p>
+                    <select data-ng-show="startIndex == 0" ng-model='route' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in routeLine[0] track by $index" value="{{item.id}}">
+                            {{item.value}}</option>
+                    </select>
+                    <select data-ng-show="startIndex != 0" ng-model='route' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in routeLine[1] track by $index" value="{{item.id}}">
+                            {{item.value}}</option>
+                    </select>
+                </div>
+                <div class="layout-select">
+                    <p>目的港:</p>
+                    <select data-ng-show="route == 0" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[0] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 1" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[1] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 2" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[2] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 3" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[3] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 4" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[4] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 5" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[5] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 6" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[6] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 7" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[7] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 8" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[8] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 9" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[9] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 10" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[10] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 11" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[11] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 12" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[12] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 13" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[13] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 14" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[14] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 15" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[15] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                    <select data-ng-show="route == 16" ng-model='valueEndPort' class="select" ng-disabled="!finish && runningPort">
+                        <option ng-repeat="item in endPort[16] track by $index" value="{{item.end}}">
+                            {{item.end}}</option>
+                    </select>
+                </div>
             </div>
-            <div class="form-group">
+            <!-- <div class="form-group">
                 目的港:
                 <input type="text" style="width: 80%;" name="" id="" ng-model="inputValue.endPort">
-            </div>
+            </div> -->
         </div>
         <div class="col-xs-2">
             <div class="form-group">

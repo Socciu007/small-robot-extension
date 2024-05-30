@@ -29,6 +29,12 @@ async function search(port) {
 		await typeText(inputEle[1], port.endPort); //Singapore, Singapore
 		await sleep(1000);
 
+		//selce
+		const switchNums = cName('switchNums')[5];
+		switchNums.click();
+		await sleep(1000);
+
+
 		// increase container size
 		const number = "1";
 		await typeNumber(inputEle[2], number);
@@ -135,8 +141,10 @@ chrome.runtime.onMessage.addListener(async function (
 ) {
 	const { action, data } = request;
 
+
 	manifestRequest = data;
 	if (action === "search") {
+		console.log(data);
 		const isSearch = await search(manifestRequest);
 		if (isSearch) {
 			await chrome.runtime.sendMessage(
@@ -371,13 +379,13 @@ function crawlData() {
 	let index = {
 		startPort: 0,
 		endPort: 3,
-		exportDate: 1,
+		day: 0,
 		tripCode: 0,
 		shipName: 1,
 		// tripName: 0,
 		transPort: 2,
 		tripDuration: 0,
-		typeContainer: 0,
+		gp: 0,
 	};
 	const startPort = manifestRequest.startPort;
 	const endPort = manifestRequest.endPort;
@@ -389,41 +397,38 @@ function crawlData() {
 	for (let i = 0; i < selectorResults.length; i++) {
 		let shipName = document.querySelectorAll(".svvd > span");
 		shipName = shipName[index.shipName].innerText.split(" ");
+		const eleDay = document.querySelectorAll(".time-info > span:nth-child(1)");
 
 		resultSearch.push({
-			startPort: startPort
-				? startPort
-				: document.querySelectorAll(
-					".product-show-wrapper .product-content-card .info-list .title.blod"
-				)[index.startPort].innerText,
-			endPort: endPort
-				? endPort
-				: document.querySelectorAll(
-					".product-show-wrapper .product-content-card .info-list .title.blod"
-				)[index.endPort].innerText,
-			exportDate: parseDateTime(document.querySelectorAll(
-				".product-show-wrapper .product-content-card .time-info > span:nth-child(1)"
-			)[index.exportDate].innerText),
-			tripCode: document.querySelectorAll(
-				".product-show-wrapper .product-content-card .serviceCode"
-			)[i].innerText,
-			shipName: trimArray(shipName, 1, 2).join(" "),
-			tripName: shipName.slice(-2).join(" "),
-			transPort: document.querySelectorAll(
-				".product-show-wrapper .product-content-card .info-list .title.blod"
-			)[index.transPort].innerText,
-			tripDuration: cName('e-text')[index.tripDuration].innerText,
-			container20GP: cName('e-single-number')[index.typeContainer].innerText,
-			container40GP: cName('e-single-number')[index.typeContainer + 1].innerText,
-			container40HQ: cName('e-single-number')[index.typeContainer + 2].innerText,
+			startPort: startPort ? startPort : cName("title blod")[index.startPort].innerText,
+			endPort: endPort ? endPort : cName("title blod")[index.endPort].innerText,
+			shipCompany: trimArray(shipName, 1, 2).join(" "),
+			transferPort: cName("title blod")[index.transPort].innerText,
+			startPortPier: "",
+			endPortPier: "",
+			routeName: manifestRequest.routeName || "",
+			code: cName("serviceCode")[i].innerText,
+			overTime: parseDateTime(eleDay[index.day + 3].innerText),
+			use: 0,
+			firstSupply: "", // 
+			remark: "",
+			remarkOp: "",
+			range: cName('e-text')[index.tripDuration].innerText,
+			sailingDay: parseDateTime(eleDay[index.day + 1].innerText),
+			startTime: parseDateTime(eleDay[index.day].innerText),//
+			schedule: getDayOfWeek(parseDateTime(eleDay[index.day + 1].innerText)),
+			shippingSpace: "",
+			gp20GP: convertStringToNumber(cName('e-single-number')[index.gp].innerText),
+			gp40GP: convertStringToNumber(cName('e-single-number')[index.gp + 1].innerText),
+			gp40HQ: convertStringToNumber(cName('e-single-number')[index.gp + 2].innerText),
 		});
 
 		index.startPort += 4;
 		index.endPort += 4;
-		index.exportDate += 4;
+		index.day += 4;
 		index.transPort += 4;
 		index.shipName += 3;
-		index.typeContainer += 3;
+		index.gp += 3;
 		index.tripDuration += 5;
 	}
 
@@ -481,3 +486,37 @@ function parseDateTime(dateTimeStr) {
 
 	return dateObj;
 }
+
+function convertStringToNumber(str) {
+	// Remove commas from the string
+	const cleanedStr = str.replace(/,/g, '');
+	// Convert the cleaned string to a number
+	const number = parseFloat(cleanedStr);
+	return number;
+}
+
+function getDayOfWeek(date) {
+	const options = { weekday: 'long' }; // 'long' for full name, 'short' for abbreviated
+	return date.toLocaleDateString('en-US', options);
+}
+
+// startPort: startPort,
+// 	endPort: endPort,
+// 		startPortPier: startPortPier,
+// 			endPortPier: endPortPier,
+// 				transferPort: transferPort,
+// 					routeName: routeName,
+// 						code: code,
+// 							overTime: overTime,
+// 								use: use,
+// 									firstSupply: firstSupply,
+// 										remark: remark,
+// 											remarkOp: remarkOp,
+// 												range: range,
+// 													sailingDay: sailingDay,
+// 														startTime: startTime,
+// 															schedule: schedule,
+// 																shippingSpace: shippingSpace,
+// 																	gp20GP: gp20GP,
+// 																		gp40GP: gp40GP,
+// 																			gp40HQ: gp40HQ
