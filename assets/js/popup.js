@@ -68,9 +68,9 @@ FyApp.controller("popupController", [
     ) {
       //response from tabs
       const { actionId, status, data } = request;
-      console.log(data);
       if (actionId === "searchComplete") {
         if (status === "OK") {
+          console.log(actionId);
           await new Promise((resolve) => setTimeout(resolve, 2000));
           chrome.tabs.query(
             { active: true, currentWindow: true },
@@ -90,6 +90,7 @@ FyApp.controller("popupController", [
         }
       } else if (request.actionId === "crawlDataComplete") {
         if (request.status === "OK") {
+          console.log(actionId, data);
           // 处理从content_script的回传数据，可将数据通过外部接口进行传输
           for (var i = 0; i < data.resultsSearch.length; i++) {
             await $.ajax({

@@ -115,7 +115,7 @@ async function typeText(elementSelector, text) {
 		const listPort = cName("city");
 		await sleep(1000);
 		for (let i = 0; i < listPort.length; i++) {
-			if (listPort[i].innerText.includes(text)) {
+			if (listPort[i].innerText.includes(capitalizeFirstLetter(text))) {
 				listPort[i].dispatchEvent(focusEvent);
 				await sleep(1000);
 
@@ -358,6 +358,12 @@ async function loginOOCL(userName, password) {
 	} catch (error) {
 		return isLogin;
 	}
+}
+
+function capitalizeFirstLetter(string) {
+	return string.toLowerCase().replace(/(?:^|\s)\w/g, function (match) {
+		return match.toUpperCase();
+	});
 }
 
 function crawlData() {
