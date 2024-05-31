@@ -21,15 +21,22 @@
                 </div>
                 <div class="layout-select">
                     <p>航线:</p>
-                    <select data-ng-show="indexStartPort == 0" ng-model='indexRoute' class="select" ng-disabled="!finish && runningPort">
+                    <select data-ng-show="indexStartPort == 0" ng-model='routeIndex' class="select" ng-disabled="!finish && runningPort">
                         <option ng-repeat="item in route[0] track by $index" value="{{item.id}}">
                             {{item.value}}</option>
                     </select>
-                    <select data-ng-show="indexStartPort != 0" ng-model='indexRoute' class="select" ng-disabled="!finish && runningPort">
+                    <select data-ng-show="indexStartPort != 0" ng-model='routeIndex' class="select" ng-disabled="!finish && runningPort">
                         <option ng-repeat="item in route[1] track by $index" value="{{item.id}}">
                             {{item.value}}</option>
                     </select>
                 </div>
+                <div class="col-xs-12">
+                    <div class="form-group" data-ng-show="!finish && runningPort">
+                        <p>以下港口执行中,请勿随意切换港口......</p>
+                        <p>{{startPort[startPortIndex].nameEnEB}} ~ {{opPort[routeIndex][0].endEB}}</p>
+                    </div>
+                    <alert data-ng-type="success" data-ng-show="finish && !runningPort">{{finishTxt}}</alert>
+                </div> 
             </div>
             <!-- <div class="form-group">
                 目的港:
@@ -38,7 +45,7 @@
         </div>
         <div class="col-xs-2">
             <div class="form-group">
-                <button type="button" class="btn btn-primary" data-ng-click="runFile('search')">执行</button>
+                <button type="button" class="btn btn-primary" data-ng-click="runFile(true)">执行</button>
             </div>
             
         </div>

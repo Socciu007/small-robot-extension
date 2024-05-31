@@ -6,11 +6,9 @@ FyApp.controller("popupController", [
   function popupController($scope, $http) {
     var zl_manifest_url =
       "https://freightsmart.oocl.com/digital/product/search-quote";
-    var zl_manifest_url_0 =
-      "https://freightsmart.oocl.com/digital/product/search-result";
     $scope.working_tab_id = 0;
     $scope.pageLoaded = false;
-    $scope.hadRunning = false;
+
     chrome.storage.local.get(["pageLoaded"], function (items) {
       $scope.pageLoaded = !!items.pageLoaded;
     });
@@ -78,7 +76,7 @@ FyApp.controller("popupController", [
         { value: "印巴线", id: 16 },
       ],
     ];
-    $scope.indexRoute = "0";
+    $scope.routeIndex = "0";
 
     $scope.endPort = [
       // 上海 6
@@ -88,21 +86,21 @@ FyApp.controller("popupController", [
           endEB: "ADELAIDE",
           routeName: "澳洲线",
         },
-        {
-          end: "BRISBANE",
-          endEB: "BRISBANE",
-          routeName: "澳洲线",
-        },
+        // {
+        //   end: "BRISBANE",
+        //   endEB: "BRISBANE",
+        //   routeName: "澳洲线",
+        // },
         {
           end: "FREMANTLE",
           endEB: "FREMANTLE",
           routeName: "澳洲线",
         },
-        {
-          end: "MELBOURNE",
-          endEB: "MELBOURNE",
-          routeName: "澳洲线",
-        },
+        // {
+        //   end: "MELBOURNE",
+        //   endEB: "MELBOURNE",
+        //   routeName: "澳洲线",
+        // },
         {
           end: "SYDNEY",
           endEB: "SYDNEY",
@@ -941,25 +939,44 @@ FyApp.controller("popupController", [
         },
       ],
     ];
+    $scope.runningPort = false
+    $scope.finish = false
+    $scope.finishTxt = ''
+    $scope.opPort = [];
+    $scope.allCrawlData = [];
 
-    $scope.runFile = function (action) {
+    $scope.runFile = function (isFirstInput) {
       //  判断页面是否加载完成
       if (!$scope.pageLoaded) {
         return $scope.showAlert("请等待页面完全加载再操作", "danger");
+      }
+
+      $scope.opPort = JSON.parse(JSON.stringify($scope.endPort));
+      if ($scope.startPortIndex == "") {
+        return $scope.showAlert("Please select departure port", "danger");
+      } else if ($scope.routeIndex == "") {
+        return $scope.showAlert("Please select route", "danger");
       } else {
         chrome.tabs.executeScript($scope.working_tab_id, {
           file: "assets/js/content_script.js",
         });
-        $scope.hadRunning = true;
-        $scope.search(action);
+        $scope.runningPort = true;
+        //update allCrawlData when running end port new
+        $scope.allCrawlData = [];
+        $scope.search($scope.startPort[$scope.startPortIndex], $scope.opPort[$scope.routeIndex][0], isFirstInput);
       }
     };
 
-    $scope.search = function (action, req) {
+    $scope.search = function (startP, endP, isFirstInput = false) {
       setTimeout(() => {
         chrome.tabs.sendMessage($scope.working_tab_id, {
-          action: action,
-          req: req,
+          'data': {
+            startPort: startP,
+            endPort: endP,
+            route: $scope.startPortIndex == '0' ?
+              $scope.route[0][$scope.startPortIndex].value : $scope.route[1][$scope.startPortIndex].value,
+          },
+          'isFirstInput': isFirstInput
         });
       }, 1000);
     };
@@ -971,52 +988,80 @@ FyApp.controller("popupController", [
       sendResponse
     ) {
       //response from tabs
-      const { actionId, status, data } = request;
-      if (actionId === "searchComplete") {
-        if (status === "OK") {
-          console.log(actionId);
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-          chrome.tabs.query(
-            { active: true, currentWindow: true },
-            function (tabs) {
-              var tab = tabs[0];
-              // 目标页在浏览器中的id
-              $scope.working_tab_id = tab.id;
-              // $scope.runWorkingStage(tab, zl_manifest_url);
-            }
-          );
+      const { status, data } = request;
+      //remove first element after run search 
+      $scope.opPort[$scope.routeIndex].shift();
+      console.log("data: " + data);
 
-          $scope.search("crawlData");
-
-          $scope.$apply();
-        } else {
-          $scope.showAlert("Error search", "danger");
+      if (data == {}) {
+        $scope.runningPort = false;
+        $scope.finish = true;
+        $scope.finishTxt = '哎呦! 出错了~~~';
+        $scope.$apply();
+      } else if (data.resultsSearch.length > 0) {
+        $scope.allCrawlData = $scope.allCrawlData.concat(...data.resultsSearch);
+        console.log("data", $scope.allCrawlData);
+        if ($scope.opPort[$scope.routeIndex].length > 0) {
+          $scope.search($scope.startPort[$scope.startPortIndex], $scope.opPort[$scope.routeIndex][0]);
         }
-      } else if (request.actionId === "crawlDataComplete") {
-        if (request.status === "OK") {
-          console.log(actionId, data);
-          // 处理从content_script的回传数据，可将数据通过外部接口进行传输
-          for (var i = 0; i < data.resultsSearch.length; i++) {
-            await $.ajax({
-              url: "http://localhost:3000/moneyapi/createQuote",
-              type: "POST",
-              data: JSON.stringify(data.resultsSearch[i]),
-              contentType: "application/json",
-              success: function (res) {
-                if (res.status === "OK") {
-                  console.log("Quote created successfully:", res);
-                } else {
-                  console.error("Error creating quote:", res.message);
-                }
-              },
-              error: function (err) {
-                console.error("AJAX error:", err);
-              },
-            });
-            await new Promise((resolve) => setTimeout(resolve, 3000));
-          }
-        } else {
-          $scope.showAlert("Error crawl data", "danger");
+      } else {
+        if ($scope.opPort[$scope.routeIndex].length > 0) {
+          $scope.search($scope.startPort[$scope.startPortIndex], $scope.opPort[$scope.routeIndex][0]);
+        }
+      }
+
+      if ($scope.opPort[$scope.routeIndex].length == 0) {
+        console.log("Crawl data", $scope.allCrawlData);
+        if ($scope.allCrawlData.length > 0) {
+          // Copy and remove duplicates
+          const newAllCrawData = $scope.allCrawlData.filter((item, index, self) => {
+            return self.findIndex((otherItem) =>
+              item.startPort === otherItem.startPort &&
+              item.endPort === otherItem.endPort &&
+              item.transferPort === otherItem.transferPort &&
+              item.shipCompany === otherItem.shipCompany &&
+              item.startPortPier === otherItem.startPortPier &&
+              item.endPortPier === otherItem.endPortPier &&
+              item.routeName === otherItem.routeName &&
+              item.sailingDay === otherItem.sailingDay &&
+              item.firstSupply === otherItem.firstSupply &&
+              item.code === otherItem.code &&
+              item.schedule === otherItem.schedule
+            ) === index
+          });
+          console.log("Copied all crawl data: " + JSON.stringify(newAllCrawData));
+          // send crawl data to API interface
+          await $.ajax({
+            url: "http://localhost:3000/moneyapi/createQuote",
+            type: "POST",
+            data: JSON.stringify({ results: JSON.stringify(newAllCrawData) }),
+            contentType: "application/json",
+            success: function (res) {
+              if (res.status === "OK") {
+                console.log("Quote created successfully:", res);
+                $scope.runningPort = false;
+                $scope.allCrawlData = [];
+                $scope.finish = true;
+                const item = $scope.route.flat().find(item => item.id === Number($scope.routeIndex))
+                $scope.finishTxt = $scope.startPort[$scope.startPortIndex].nameEnEB + ' * ' + item.value + ' 操作完成'
+                $scope.$apply();
+              } else {
+                console.error("Error creating quote:", res.message);
+                $scope.runningPort = false;
+                $scope.finish = true;
+                $scope.finishTxt = res.message;
+                $scope.$apply();
+              }
+            },
+            error: function (err) {
+              console.error("AJAX error:", err.responseJSON.errors);
+              $scope.allCrawlData = [];
+              $scope.runningPort = false;
+              $scope.finish = true;
+              $scope.finishTxt = err.responseJSON.errors;
+              $scope.$apply();
+            },
+          });
         }
       }
     });
