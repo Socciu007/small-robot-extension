@@ -88,7 +88,6 @@ chrome.runtime.onMessage.addListener(async function (
 
 	const isSearch = await search(manifestRequest, isFirstInput);
 
-<<<<<<< HEAD
 	//loading search results
 	await sleep(random(5000, 10000));
 	if (isSearch) {
@@ -111,28 +110,6 @@ chrome.runtime.onMessage.addListener(async function (
 			function (res) { }
 		);
 	}
-=======
-  //loading search results
-  await sleep(random(5000, 10000));
-  if (isSearch) {
-    const data = await setManifestHtml();
-    console.log("data", data);
->>>>>>> 09378774e63fca39aac939c0e03ba9f95529bad4
-
-	await chrome.runtime.sendMessage(
-		{
-			actionId: "searchComplete",
-			status: 1,
-			data: data,
-		},
-		function (res) { }
-	);
-} else {
-	await chrome.runtime.sendMessage(
-		{ actionId: "searchComplete", status: 0 },
-		function (res) { }
-	);
-}
 });
 
 async function typeNumber(dom, number) {
