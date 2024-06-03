@@ -8,24 +8,22 @@ async function setManifestHtml() {
 		const data = await crawlData();
 		await sleep(random(1000, 3000));
 
+		//returns the search page after crawling
 		const backEle = cName("el-page-header__back")[0];
 		backEle.click();
 		await sleep(random(1000, 3000));
-
 		const inputEle = cName("el-input__inner");
 		inputEle[0].click();
 		await sleep(random(1000, 3000));
 		inputEle[0].value = "";
-		// await inputValue(inputEle[0], "");
 		await sleep(random(1000, 3000));
 		inputEle[1].value = "";
-		// await inputValue(inputEle[1], "");
 		await sleep(random(1000, 3000));
 
 		return data;
 	} catch (error) {
 		console.log("error", error);
-		return {};
+		return { resultsSearch: [] };
 	}
 }
 
@@ -46,6 +44,7 @@ async function search(keyWord, isFirstInput) {
 		await typeText(inputEle[1], keyWord.endPort.end); //Singapore, Singapore
 		await sleep(1000);
 
+		// Enter the parameters for the first import
 		if (isFirstInput) {
 			//select type dates port departure
 			const switchNums = cName("switchNums")[5];
@@ -65,12 +64,76 @@ async function search(keyWord, isFirstInput) {
 		// click search button
 		await clickElement(searchEle);
 		await sleep(random(1000, 3000));
+		//check url tab
+		window.addEventListener("load", () => {
+			chrome.runtime.sendMessage({ message: "Tab is ready" }, (response) => {
+				console.log("Popup received the message:", response);
+			});
+		});
 
 		return true;
 	} catch (error) {
+		console.log("error", error);
 		return false;
 	}
 }
+
+chrome.runtime.onMessage.addListener(async function (
+	request,
+	sender,
+	sendResponse
+) {
+	const { isFirstInput, data } = request;
+	manifestRequest = data;
+
+	const isSearch = await search(manifestRequest, isFirstInput);
+
+<<<<<<< HEAD
+	//loading search results
+	await sleep(random(5000, 10000));
+	if (isSearch) {
+		const data = await setManifestHtml();
+		console.log("data", data);
+
+		// chrome.runtime.sendMessage({
+		// 	action: "updateVariable",
+		// 	newValue: true,
+		// 	data: data
+		// });
+
+		chrome.runtime.sendMessage(
+			{ actionId: "searchComplete", status: 1, data: data },
+			function (res) { }
+		);
+	} else {
+		chrome.runtime.sendMessage(
+			{ actionId: "searchComplete", status: 0, data: {} },
+			function (res) { }
+		);
+	}
+=======
+  //loading search results
+  await sleep(random(5000, 10000));
+  if (isSearch) {
+    const data = await setManifestHtml();
+    console.log("data", data);
+>>>>>>> 09378774e63fca39aac939c0e03ba9f95529bad4
+
+	await chrome.runtime.sendMessage(
+		{
+			actionId: "searchComplete",
+			status: 1,
+			data: data,
+		},
+		function (res) { }
+	);
+} else {
+	await chrome.runtime.sendMessage(
+		{ actionId: "searchComplete", status: 0 },
+		function (res) { }
+	);
+}
+});
 
 async function typeNumber(dom, number) {
 	try {
@@ -155,42 +218,6 @@ async function typeText(elementSelector, text) {
 		console.error("Err typing text ", error);
 	}
 }
-
-chrome.runtime.onMessage.addListener(async function (
-	request,
-	sender,
-	sendResponse
-) {
-	const { isFirstInput, data } = request;
-	manifestRequest = data;
-	console.log("request", manifestRequest);
-
-	const isSearch = await search(manifestRequest, isFirstInput);
-
-	//loading search results
-	await sleep(random(5000, 10000));
-	if (isSearch) {
-		const data = await setManifestHtml();
-		console.log("data", data);
-
-		// chrome.runtime.sendMessage({
-		// 	action: "updateVariable",
-		// 	newValue: true,
-		// 	data: data
-		// });
-
-		chrome.runtime.sendMessage(
-			{ actionId: "searchComplete", status: 1, data: data },
-			function (res) { }
-		);
-	} else {
-		chrome.runtime.sendMessage(
-			{ actionId: "searchComplete", status: 0, data: {} },
-			function (res) { }
-		);
-	}
-
-});
 
 // 鼠标点击事件
 function mClick(dom) {
@@ -436,11 +463,12 @@ async function crawlData() {
 			}
 		}
 
-		const showInfoEle = cName('unfold-hide-wrapper');
+		// show detail data before crawl data
+		const showInfoEle = cName("unfold-hide-wrapper");
 		if (showInfoEle.length > 0) {
 			for (let j = 0; j < showInfoEle.length; j++) {
 				showInfoEle[j].click();
-				await sleep(random(1000, 3000));
+				await sleep(random(2000, 3000));
 			}
 
 			resultSearch.push({
@@ -559,7 +587,6 @@ function convertStringToNumber(str) {
 
 // 船期处理
 function scheduleFun(sch) {
-	var week = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
-	return week[new Date(sch).getDay()]
+	var week = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+	return week[new Date(sch).getDay()];
 }
-

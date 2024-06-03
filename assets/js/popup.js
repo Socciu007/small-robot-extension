@@ -944,9 +944,9 @@ FyApp.controller("popupController", [
         },
       ],
     ];
-    $scope.runningPort = false
-    $scope.finish = false
-    $scope.finishTxt = ''
+    $scope.runningPort = false;
+    $scope.finish = false;
+    $scope.finishTxt = "";
     $scope.opPort = [];
     $scope.allCrawlData = [];
 
@@ -968,20 +968,26 @@ FyApp.controller("popupController", [
         $scope.runningPort = true;
         //update allCrawlData when running end port new
         $scope.allCrawlData = [];
-        $scope.search($scope.startPort[$scope.startPortIndex], $scope.opPort[$scope.routeIndex][0], isFirstInput);
+        $scope.search(
+          $scope.startPort[$scope.startPortIndex],
+          $scope.opPort[$scope.routeIndex][0],
+          isFirstInput
+        );
       }
     };
 
     $scope.search = function (startP, endP, isFirstInput = false) {
       setTimeout(() => {
         chrome.tabs.sendMessage($scope.working_tab_id, {
-          'data': {
+          data: {
             startPort: startP,
             endPort: endP,
-            route: $scope.startPortIndex == '0' ?
-              $scope.route[0][$scope.startPortIndex].value : $scope.route[1][$scope.startPortIndex].value,
+            route:
+              $scope.startPortIndex == "0"
+                ? $scope.route[0][$scope.startPortIndex].value
+                : $scope.route[1][$scope.startPortIndex].value,
           },
-          'isFirstInput': isFirstInput
+          isFirstInput: isFirstInput,
         });
       }, 1000);
     };
@@ -994,24 +1000,30 @@ FyApp.controller("popupController", [
     ) {
       //response from tabs
       const { status, data } = request;
-      //remove first element after run search 
+      console.log("req", request);
       $scope.opPort[$scope.routeIndex].shift();
       console.log("data: ", request);
 
-      if (data == {}) {
+      if (status === 0) {
         $scope.runningPort = false;
         $scope.finish = true;
-        $scope.finishTxt = '哎呦! 出错了~~~';
+        $scope.finishTxt = "哎呦! 出错了~~~";
         $scope.$apply();
-      } else if (data.resultsSearch.length > 0) {
+      } else if (status === 1 && data.resultsSearch.length > 0) {
         $scope.allCrawlData = $scope.allCrawlData.concat(...data.resultsSearch);
         console.log("data", $scope.allCrawlData);
         if ($scope.opPort[$scope.routeIndex].length > 0) {
-          $scope.search($scope.startPort[$scope.startPortIndex], $scope.opPort[$scope.routeIndex][0]);
+          $scope.search(
+            $scope.startPort[$scope.startPortIndex],
+            $scope.opPort[$scope.routeIndex][0]
+          );
         }
       } else {
         if ($scope.opPort[$scope.routeIndex].length > 0) {
-          $scope.search($scope.startPort[$scope.startPortIndex], $scope.opPort[$scope.routeIndex][0]);
+          $scope.search(
+            $scope.startPort[$scope.startPortIndex],
+            $scope.opPort[$scope.routeIndex][0]
+          );
         }
       }
 
@@ -1047,8 +1059,14 @@ FyApp.controller("popupController", [
                 $scope.runningPort = false;
                 $scope.allCrawlData = [];
                 $scope.finish = true;
-                const item = $scope.route.flat().find(item => item.id === Number($scope.routeIndex))
-                $scope.finishTxt = $scope.startPort[$scope.startPortIndex].nameEnEB + ' * ' + item.value + ' 操作完成'
+                const item = $scope.route
+                  .flat()
+                  .find((item) => item.id === Number($scope.routeIndex));
+                $scope.finishTxt =
+                  $scope.startPort[$scope.startPortIndex].nameEnEB +
+                  " * " +
+                  item.value +
+                  " 操作完成";
                 $scope.$apply();
               } else {
                 console.error("Error creating quote:", res.message);
@@ -1087,7 +1105,6 @@ FyApp.controller("popupController", [
 
     //判断目标页是否已经打开
     $scope.runWorkingStage = function (tab, urlMain) {
-      console.log('FSD', backgroundPage.getVariable());
       if (!backgroundPage.getVariable()) {
         chrome.tabs.executeScript(tab.id, {
           file: "assets/js/content_script.js",
