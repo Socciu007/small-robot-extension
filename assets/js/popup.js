@@ -12,7 +12,6 @@ FyApp.controller("popupController", [
 
     // 在 popup.js 中获取背景页
     const backgroundPage = chrome.extension.getBackgroundPage();
-    console.log('Background', backgroundPage.getVariable());
 
     chrome.storage.local.get(["pageLoaded"], function (items) {
       $scope.pageLoaded = !!items.pageLoaded;
@@ -91,21 +90,21 @@ FyApp.controller("popupController", [
           endEB: "ADELAIDE",
           routeName: "澳洲线",
         },
-        // {
-        //   end: "BRISBANE",
-        //   endEB: "BRISBANE",
-        //   routeName: "澳洲线",
-        // },
+        {
+          end: "BRISBANE",
+          endEB: "BRISBANE",
+          routeName: "澳洲线",
+        },
         {
           end: "FREMANTLE",
           endEB: "FREMANTLE",
           routeName: "澳洲线",
         },
-        // {
-        //   end: "MELBOURNE",
-        //   endEB: "MELBOURNE",
-        //   routeName: "澳洲线",
-        // },
+        {
+          end: "MELBOURNE",
+          endEB: "MELBOURNE",
+          routeName: "澳洲线",
+        },
         {
           end: "SYDNEY",
           endEB: "SYDNEY",
@@ -1002,7 +1001,6 @@ FyApp.controller("popupController", [
       const { status, data } = request;
       console.log("req", request);
       $scope.opPort[$scope.routeIndex].shift();
-      console.log("data: ", request);
 
       if (status === 0) {
         $scope.runningPort = false;
@@ -1011,7 +1009,6 @@ FyApp.controller("popupController", [
         $scope.$apply();
       } else if (status === 1 && data.resultsSearch.length > 0) {
         $scope.allCrawlData = $scope.allCrawlData.concat(...data.resultsSearch);
-        console.log("data", $scope.allCrawlData);
         if ($scope.opPort[$scope.routeIndex].length > 0) {
           $scope.search(
             $scope.startPort[$scope.startPortIndex],
@@ -1046,10 +1043,9 @@ FyApp.controller("popupController", [
               item.schedule === otherItem.schedule
             ) === index
           });
-          console.log("Copied all crawl data: ", newAllCrawData);
           // send crawl data to API interface
           await $.ajax({
-            url: "http://localhost:3000/moneyapi/createManyQuotes",
+            url: "http://localhost:3000/moneyapi/crawlDataOOCL",
             type: "POST",
             data: JSON.stringify({ results: newAllCrawData }),
             contentType: "application/json",
@@ -1119,6 +1115,7 @@ FyApp.controller("popupController", [
       $scope.$apply();
     };
 
+    // 监听目标页是否加载完成
     $(function () {
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         var tab = tabs[0];
@@ -1129,7 +1126,6 @@ FyApp.controller("popupController", [
     });
 
     $scope.$watch('workingStage', function (newVal, oldVal) {
-      console.log("test", newVal, oldVal);
       if (newVal === oldVal) {
         return false;
       }

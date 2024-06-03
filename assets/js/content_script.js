@@ -3,6 +3,8 @@ var user = {
 	name: "riverhe",
 	password: "Fy112516",
 };
+
+//OOCL
 async function setManifestHtml() {
 	try {
 		const data = await crawlData();
@@ -10,6 +12,7 @@ async function setManifestHtml() {
 
 		//returns the search page after crawling
 		const backEle = cName("el-page-header__back")[0];
+		await sleep(random(1000, 3000));
 		backEle.click();
 		await sleep(random(1000, 3000));
 		const inputEle = cName("el-input__inner");
@@ -22,20 +25,20 @@ async function setManifestHtml() {
 
 		return data;
 	} catch (error) {
-		console.log("error", error);
 		return { resultsSearch: [] };
 	}
 }
 
+//Search on the OOCL site
 async function search(keyWord, isFirstInput) {
 	try {
-		// find dom
+		// find dom and check exist dom
 		const inputEle = cName("el-input__inner");
 		const searchEle = await cSelector("button.search-button");
-		// check exist dom
 		if (inputEle.length < 1 || !searchEle) {
 			return false;
 		}
+
 		// typing start port
 		await typeText(inputEle[0], keyWord.startPort.nameEn); //Shanghai, China
 		await sleep(1000);
@@ -64,16 +67,9 @@ async function search(keyWord, isFirstInput) {
 		// click search button
 		await clickElement(searchEle);
 		await sleep(random(1000, 3000));
-		//check url tab
-		window.addEventListener("load", () => {
-			chrome.runtime.sendMessage({ message: "Tab is ready" }, (response) => {
-				console.log("Popup received the message:", response);
-			});
-		});
 
 		return true;
 	} catch (error) {
-		console.log("error", error);
 		return false;
 	}
 }
@@ -84,6 +80,7 @@ chrome.runtime.onMessage.addListener(async function (
 	sendResponse
 ) {
 	const { isFirstInput, data } = request;
+	console.log('req', data);
 	manifestRequest = data;
 
 	const isSearch = await search(manifestRequest, isFirstInput);
@@ -93,13 +90,11 @@ chrome.runtime.onMessage.addListener(async function (
 	if (isSearch) {
 		const data = await setManifestHtml();
 		console.log("data", data);
-
 		// chrome.runtime.sendMessage({
 		// 	action: "updateVariable",
 		// 	newValue: true,
 		// 	data: data
 		// });
-
 		chrome.runtime.sendMessage(
 			{ actionId: "searchComplete", status: 1, data: data },
 			function (res) { }
@@ -114,19 +109,19 @@ chrome.runtime.onMessage.addListener(async function (
 
 async function typeNumber(dom, number) {
 	try {
+		// click input and wait for input click
 		if (!dom) {
 			console.error(`Element with selector "${dom}" not found.`);
 			return;
 		}
 		dom.click();
-
-		// wait for input click
 		await sleep(1000);
 
 		// focus input
 		const focusEvent = new Event("focus", { bubbles: true });
 		dom.dispatchEvent(focusEvent);
 
+		// Enter the value into the input box
 		const keydownEvent = new KeyboardEvent("keydown", {
 			key: number,
 			code: `Digit${number}`,
@@ -295,40 +290,6 @@ function inputValue(dom, st) {
 	dom.dispatchEvent(evt);
 }
 
-function inputTyping(dom, text, ms = 1000) {
-	return new Promise((resolve, reject) => {
-		if (!dom || !(dom instanceof HTMLElement)) {
-			return reject(new Error("Invalid DOM element"));
-		}
-
-		let index = 0;
-
-		function typeNextCharacter() {
-			if (index < text.length) {
-				let char = text[index];
-				let keyEvent = new KeyboardEvent("keydown", {
-					bubbles: true,
-					cancelable: true,
-					key: char,
-					code: `Key${char.toUpperCase()}`,
-					charCode: char.charCodeAt(0),
-					keyCode: char.charCodeAt(0),
-					which: char.charCodeAt(0),
-				});
-
-				dom.value += char;
-				dom.dispatchEvent(keyEvent);
-				index++;
-				setTimeout(typeNextCharacter, ms);
-			} else {
-				resolve("Typing simulation completed");
-			}
-		}
-
-		typeNextCharacter();
-	});
-}
-
 function sleep(ms) {
 	return new Promise((resolve, reject) => {
 		setTimeout(() => {
@@ -366,7 +327,7 @@ async function loginOOCL(userName, password) {
 		const eleUserName = await cSelector('input[class="el-input__inner"]');
 		const eleNext = await cSelector('button[type="button"]');
 		if (eleUserName && eleNext) {
-			await inputTyping(eleUserName, userName);
+			await typeText(eleUserName, userName);
 			await sleep(random(1000, 3000));
 			await mClick(eleNext);
 			await sleep(random(1000, 3000));
@@ -377,7 +338,7 @@ async function loginOOCL(userName, password) {
 				await mClick(await cSelector('button[type="button"]'));
 				isLogin = true;
 			} else if (elePassword && eleLogin) {
-				await inputTyping(elePassword, password, 1000);
+				await typeText(elePassword, password, 1000);
 				await sleep(random(1000, 3000));
 				await mClick(eleLogin);
 				isLogin = true;
@@ -399,6 +360,7 @@ function capitalizeFirstLetter(string) {
 	});
 }
 
+//format data and crawl data from OOCL
 async function crawlData() {
 	let data = {};
 	let index = {
@@ -417,16 +379,15 @@ async function crawlData() {
 	const startPort = manifestRequest.startPort.nameEnEB;
 	const endPort = manifestRequest.endPort.endEB;
 
-	//content search results
+	//all data after searching
 	const selectorResults = cName("product-content-card");
 	let resultSearch = [];
 
 	for (let i = 0; i < selectorResults.length; i++) {
-		//ship name and trip
+		//handle ship name, trip and get time to handle sailingDay, startTime, overTime
 		const remarkOp = cName("svvd");
 		const dayEle = document.querySelectorAll(".time-info > span:nth-child(1)");
 
-		console.log(cName("e-text").length);
 		// handle price container
 		let hidePrice = false;
 		const priceEle = cName("e-single-price")[index.gp];
@@ -440,6 +401,13 @@ async function crawlData() {
 			}
 		}
 
+		//handle tranferPort
+		const textTranfer = cName("title blod")[index.transPort].innerText;
+		const endEBPortName = capitalizeFirstLetter(endPort);
+		const endPortName = capitalizeFirstLetter(manifestRequest.endPort.end);
+		const tranferPort = (textTranfer.includes(endEBPortName) || textTranfer.includes(endPortName)) ? endPort : textTranfer.split("-")[0].trim();
+
+		console.log('tranfer', tranferPort);
 		// show detail data before crawl data
 		const showInfoEle = cName("unfold-hide-wrapper");
 		if (showInfoEle.length > 0) {
@@ -448,21 +416,22 @@ async function crawlData() {
 				await sleep(random(2000, 3000));
 			}
 
+			//format data and push it onto the array temp
 			resultSearch.push({
 				startPort: startPort ? startPort : cName("title blod")[index.startPort].innerText,
 				endPort: endPort ? endPort : cName("title blod")[index.endPort].innerText,
 				shipCompany: 'OOCL',
-				transferPort: cName("title blod")[index.transPort].innerText,
+				transferPort: tranferPort,
 				startPortPier: "",
 				endPortPier: "",
 				routeName: manifestRequest.route || "",
-				code: cName("serviceCode")[index.code].innerText + ", " + cName("serviceCode")[index.code + 1].innerText,
+				code: cName("serviceCode")[index.code].innerText,
 				overTime: parseDateTime(dayEle[index.day + 3].innerText),
 				use: 0,
 				firstSupply: "",
 				remark: "",
 				remarkOp: trimArray(remarkOp[index.remarkOp].innerText.split(" "), 1, 0).join(" ") + ", " + trimArray(remarkOp[index.remarkOp + 1].innerText.split(" "), 1, 0).join(" "),
-				range: cName("e-text")[index.range + 1].innerText,
+				range: extractNumberFromString(cName("e-text")[index.range + 1].innerText),
 				sailingDay: parseDateTime(dayEle[index.day + 1].innerText),
 				startTime: parseDateTime(dayEle[index.day].innerText),
 				schedule: scheduleFun(parseDateTime(dayEle[index.day + 1].innerText)),
@@ -472,6 +441,7 @@ async function crawlData() {
 				gp40HQ: hidePrice ? 88888 : convertStringToNumber(cName("e-single-number")[index.price + 2].innerText),
 			});
 
+			// update the index for the next crawl
 			index.code += 2;
 			index.range += 6;
 			index.startPort += 5;
@@ -483,11 +453,12 @@ async function crawlData() {
 			index.price += 3;
 			hidePrice = false;
 		} else {
+			//format data and push it onto the array temp
 			resultSearch.push({
 				startPort: startPort ? startPort : cName("title blod")[index.startPort].innerText,
 				endPort: endPort ? endPort : cName("title blod")[index.endPort].innerText,
 				shipCompany: 'OOCL',
-				transferPort: cName("title blod")[index.transPort].innerText,
+				transferPort: tranferPort,
 				startPortPier: "",
 				endPortPier: "",
 				routeName: manifestRequest.route || "",
@@ -497,7 +468,7 @@ async function crawlData() {
 				firstSupply: "", //
 				remark: "",
 				remarkOp: trimArray(remarkOp[index.remarkOp].innerText.split(" "), 1, 0).join(" "),
-				range: cName("e-text")[index.range].innerText,
+				range: extractNumberFromString(cName("e-text")[index.range].innerText),
 				sailingDay: parseDateTime(dayEle[index.day + 1].innerText),
 				startTime: parseDateTime(dayEle[index.day].innerText), //
 				schedule: scheduleFun(parseDateTime(dayEle[index.day + 1].innerText)),
@@ -507,6 +478,7 @@ async function crawlData() {
 				gp40HQ: hidePrice ? 88888 : convertStringToNumber(cName("e-single-number")[index.price + 2].innerText),
 			});
 
+			// update the index for the next crawl
 			index.startPort += 5;
 			index.endPort += 5;
 			index.day += 4;
@@ -518,6 +490,7 @@ async function crawlData() {
 			hidePrice = false;
 		}
 	}
+
 	data = { resultsSearch: resultSearch };
 
 	return data;
@@ -536,22 +509,31 @@ function trimArray(arr, a, b) {
 }
 
 //convert string to date
-function parseDateTime(dateTimeStr) {
-	// Extract the current year
-	const currentYear = new Date().getFullYear();
+function parseDateTime(dateStr) {
+	const date = new Date(dateStr);
 
-	// Append the current year to the provided date string
-	const dateTimeWithYear = `${dateTimeStr} ${currentYear}`;
+	// get day, month from date object
+	const year = date.getFullYear();
+	const month = ('0' + (date.getMonth() + 1)).slice(-2);
+	const day = ('0' + date.getDate()).slice(-2);
 
-	// Parse the date string into a Date object
-	const dateObj = new Date(Date.parse(dateTimeWithYear));
+	// Format "xxxx-xx-xx"
+	const formattedDate = `${year}-${month}-${day}`;
 
-	// Check if the Date object is valid
-	if (isNaN(dateObj.getTime())) {
-		throw new Error("Invalid date string");
+	return formattedDate;
+}
+
+//extract number from string
+function extractNumberFromString(str) {
+	// use regex to find number
+	const matches = str.match(/\d+/);
+
+	// check
+	if (matches && matches.length > 0) {
+		return parseInt(matches[0], 10);
+	} else {
+		return null;
 	}
-
-	return dateObj;
 }
 
 function convertStringToNumber(str) {
