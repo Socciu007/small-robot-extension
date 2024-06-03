@@ -173,12 +173,18 @@ chrome.runtime.onMessage.addListener(async function (
 		const data = await setManifestHtml();
 		console.log("data", data);
 
-		await chrome.runtime.sendMessage(
+		// chrome.runtime.sendMessage({
+		// 	action: "updateVariable",
+		// 	newValue: true,
+		// 	data: data
+		// });
+
+		chrome.runtime.sendMessage(
 			{ actionId: "searchComplete", status: 1, data: data },
 			function (res) { }
 		);
 	} else {
-		await chrome.runtime.sendMessage(
+		chrome.runtime.sendMessage(
 			{ actionId: "searchComplete", status: 0, data: {} },
 			function (res) { }
 		);
@@ -399,7 +405,7 @@ async function crawlData() {
 		tripCode: 0,
 		remarkOp: 1,
 		transPort: 2,
-		tripDuration: 0,
+		range: 0,
 		gp: 0,
 		price: 0,
 	};
@@ -413,9 +419,10 @@ async function crawlData() {
 
 	for (let i = 0; i < selectorResults.length; i++) {
 		//ship name and trip
-		const remarkOp = document.querySelectorAll(".svvd > span");
+		const remarkOp = cName("svvd");
 		const dayEle = document.querySelectorAll(".time-info > span:nth-child(1)");
 
+		console.log(cName("e-text").length);
 		// handle price container
 		let hidePrice = false;
 		const priceEle = cName("e-single-price")[index.gp];
@@ -450,7 +457,7 @@ async function crawlData() {
 				firstSupply: "",
 				remark: "",
 				remarkOp: trimArray(remarkOp[index.remarkOp].innerText.split(" "), 1, 0).join(" ") + ", " + trimArray(remarkOp[index.remarkOp + 1].innerText.split(" "), 1, 0).join(" "),
-				range: cName("e-text")[index.tripDuration + 1].innerText,
+				range: cName("e-text")[index.range + 1].innerText,
 				sailingDay: parseDateTime(dayEle[index.day + 1].innerText),
 				startTime: parseDateTime(dayEle[index.day].innerText),
 				schedule: scheduleFun(parseDateTime(dayEle[index.day + 1].innerText)),
@@ -461,6 +468,7 @@ async function crawlData() {
 			});
 
 			index.code += 2;
+			index.range += 6;
 			index.startPort += 5;
 			index.endPort += 5;
 			index.day += 5;
@@ -468,7 +476,6 @@ async function crawlData() {
 			index.remarkOp += 4;
 			index.gp += 3;
 			index.price += 3;
-			index.tripDuration += 5;
 			hidePrice = false;
 		} else {
 			resultSearch.push({
@@ -485,7 +492,7 @@ async function crawlData() {
 				firstSupply: "", //
 				remark: "",
 				remarkOp: trimArray(remarkOp[index.remarkOp].innerText.split(" "), 1, 0).join(" "),
-				range: cName("e-text")[index.tripDuration].innerText,
+				range: cName("e-text")[index.range].innerText,
 				sailingDay: parseDateTime(dayEle[index.day + 1].innerText),
 				startTime: parseDateTime(dayEle[index.day].innerText), //
 				schedule: scheduleFun(parseDateTime(dayEle[index.day + 1].innerText)),
@@ -502,7 +509,7 @@ async function crawlData() {
 			index.remarkOp += 3;
 			index.gp += 3;
 			index.price += 3;
-			index.tripDuration += 5;
+			index.range += 5;
 			hidePrice = false;
 		}
 	}

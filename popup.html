@@ -30,7 +30,7 @@
                             {{item.value}}</option>
                     </select>
                 </div>
-                <div class="col-xs-12">
+                <div class="col-xs-12 alert">
                     <div class="form-group" data-ng-show="!finish && runningPort">
                         <p>以下港口执行中,请勿随意切换港口......</p>
                         <p>{{startPort[startPortIndex].nameEnEB}} ~ {{opPort[routeIndex][0].endEB}}</p>
@@ -59,4 +59,5 @@
 <script src="assets/libs/angular-1.4.0-rc.2/plugins/ui-bootstrap-tpls-0.13.0.min.js"></script>
 <script src="assets/js/popup.js"></script>
 <script src="assets/js/utils.js" type="module"></script>
+<script src="assets/js/background.js" type="module"></script>
 </html>

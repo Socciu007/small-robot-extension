@@ -7,7 +7,12 @@ FyApp.controller("popupController", [
     var zl_manifest_url =
       "https://freightsmart.oocl.com/digital/product/search-quote";
     $scope.working_tab_id = 0;
+    $scope.workingStage = "";
     $scope.pageLoaded = false;
+
+    // 在 popup.js 中获取背景页
+    const backgroundPage = chrome.extension.getBackgroundPage();
+    console.log('Background', backgroundPage.getVariable());
 
     chrome.storage.local.get(["pageLoaded"], function (items) {
       $scope.pageLoaded = !!items.pageLoaded;
@@ -991,7 +996,7 @@ FyApp.controller("popupController", [
       const { status, data } = request;
       //remove first element after run search 
       $scope.opPort[$scope.routeIndex].shift();
-      console.log("data: " + data);
+      console.log("data: ", request);
 
       if (data == {}) {
         $scope.runningPort = false;
@@ -1011,12 +1016,12 @@ FyApp.controller("popupController", [
       }
 
       if ($scope.opPort[$scope.routeIndex].length == 0) {
-        console.log("Crawl data", $scope.allCrawlData);
         if ($scope.allCrawlData.length > 0) {
           // Copy and remove duplicates
           const newAllCrawData = $scope.allCrawlData.filter((item, index, self) => {
             return self.findIndex((otherItem) =>
               item.startPort === otherItem.startPort &&
+              item.range === otherItem.range &&
               item.endPort === otherItem.endPort &&
               item.transferPort === otherItem.transferPort &&
               item.shipCompany === otherItem.shipCompany &&
@@ -1029,15 +1034,15 @@ FyApp.controller("popupController", [
               item.schedule === otherItem.schedule
             ) === index
           });
-          console.log("Copied all crawl data: " + JSON.stringify(newAllCrawData));
+          console.log("Copied all crawl data: ", newAllCrawData);
           // send crawl data to API interface
           await $.ajax({
-            url: "http://localhost:3000/moneyapi/createQuote",
+            url: "http://localhost:3000/moneyapi/createManyQuotes",
             type: "POST",
-            data: JSON.stringify({ results: JSON.stringify(newAllCrawData) }),
+            data: JSON.stringify({ results: newAllCrawData }),
             contentType: "application/json",
             success: function (res) {
-              if (res.status === "OK") {
+              if (res.status === 1) {
                 console.log("Quote created successfully:", res);
                 $scope.runningPort = false;
                 $scope.allCrawlData = [];
@@ -1082,6 +1087,13 @@ FyApp.controller("popupController", [
 
     //判断目标页是否已经打开
     $scope.runWorkingStage = function (tab, urlMain) {
+      console.log('FSD', backgroundPage.getVariable());
+      if (!backgroundPage.getVariable()) {
+        chrome.tabs.executeScript(tab.id, {
+          file: "assets/js/content_script.js",
+        });
+      }
+
       if (tab.url.indexOf(urlMain) === -1) {
         chrome.tabs.update(tab.id, { url: urlMain });
       } else {
@@ -1098,5 +1110,20 @@ FyApp.controller("popupController", [
         $scope.runWorkingStage(tab, zl_manifest_url);
       });
     });
+
+    $scope.$watch('workingStage', function (newVal, oldVal) {
+      console.log("test", newVal, oldVal);
+      if (newVal === oldVal) {
+        return false;
+      }
+      chrome.storage.local.set({ 'workingStage': newVal });
+      $scope.workingStage = newVal;
+      $scope.showAlert('正在加载页面...', 'success');
+      if ($scope.working_tab_id === 0) return false;
+      chrome.tabs.get($scope.working_tab_id, function (tab) {
+        $scope.runWorkingStage(tab);
+      });
+    }, false);
+
   },
 ]);

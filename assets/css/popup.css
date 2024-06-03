@@ -17,3 +17,6 @@ body { width:400px; height:150px; margin:10px !important; padding: 16px;}
         margin: 0px !important;
     }
 }
+.alert {
+    padding: 7px 0;
+}
