@@ -363,136 +363,121 @@ function capitalizeFirstLetter(string) {
 //format data and crawl data from OOCL
 async function crawlData() {
 	let data = {};
-	let index = {
-		startPort: 0,
-		endPort: 3,
-		day: 0,
-		code: 0,
-		tripCode: 0,
-		remarkOp: 1,
-		transPort: 2,
-		range: 0,
-		gp: 0,
-		price: 0,
-	};
 
-	const startPort = manifestRequest.startPort.nameEnEB;
-	const endPort = manifestRequest.endPort.endEB;
+	const startPortReq = manifestRequest.startPort.nameEnEB;
+	const endPortReq = manifestRequest.endPort.endEB;
 
-	//all data after searching
-	const selectorResults = cName("product-content-card");
+	const selectorResults = cName("product-content-card");//all data after searching
 	let resultSearch = [];
 
 	for (let i = 0; i < selectorResults.length; i++) {
-		//handle ship name, trip and get time to handle sailingDay, startTime, overTime
-		const remarkOp = cName("svvd");
-		const dayEle = document.querySelectorAll(".time-info > span:nth-child(1)");
 
-		// handle price container
-		let hidePrice = false;
-		const priceEle = cName("e-single-price")[index.gp];
-		if (priceEle.innerText.includes("***")) {
-			hidePrice = true;
-			if (index.gp === 0) {
-				index.price = -3;
-			}
-			if (index.gp === 3) {
-				index.price = (index.price === 0) ? -3 : 0;
-			}
-		}
-
-		//handle tranferPort
-		const textTranfer = cName("title blod")[index.transPort].innerText;
-		const endEBPortName = capitalizeFirstLetter(endPort);
-		const endPortName = capitalizeFirstLetter(manifestRequest.endPort.end);
-		const tranferPort = (textTranfer.includes(endEBPortName) || textTranfer.includes(endPortName)) ? endPort : textTranfer.split("-")[0].trim();
-
-		console.log('tranfer', tranferPort);
-		// show detail data before crawl data
-		const showInfoEle = cName("unfold-hide-wrapper");
+		const showInfoEle = cName("unfold-hide-wrapper");// show detail data before crawl data
 		if (showInfoEle.length > 0) {
 			for (let j = 0; j < showInfoEle.length; j++) {
 				showInfoEle[j].click();
 				await sleep(random(2000, 3000));
 			}
 
+			// crawl data from OOCL
+			const startPort = startPortReq ? startPortReq : selectorResults[i].getElementsByClassName("title blod")[0].innerText;
+			const endPort = endPortReq ? endPortReq : selectorResults[i].getElementsByClassName("title blod")[3].innerText;
+			const code = selectorResults[i].getElementsByClassName("serviceCode")[0].innerText;
+			const overTime = selectorResults[i].querySelectorAll(".time-info > span:nth-child(1)")[4].innerText;
+			const remarkOp_0 = selectorResults[i].getElementsByClassName("svvd")[1].innerText.split(" ");
+			const remarkOp_1 = selectorResults[i].getElementsByClassName("svvd")[2].innerText.split(" ");
+			const range = selectorResults[i].getElementsByClassName("e-text")[1].innerText;
+			const sailingDay = selectorResults[i].querySelectorAll(".time-info > span:nth-child(1)")[1].innerText;
+			const startTime = selectorResults[i].querySelectorAll(".time-info > span:nth-child(1)")[0].innerText;
+
+			const tranferPortString = selectorResults[i].getElementsByClassName("title blod")[2].innerText;//handle tranferPort
+			const endEBPortName = capitalizeFirstLetter(endPort);
+			const endPortName = capitalizeFirstLetter(manifestRequest.endPort.end);
+			const tranferPort = (tranferPortString.includes(endEBPortName) || tranferPortString.includes(endPortName)) ? endPort : tranferPortString.split("-")[0].trim();
+
+			const gp20GPString = selectorResults[i].getElementsByClassName("e-single-price")[0].innerText; // handle price container
+			const gp40GPString = selectorResults[i].getElementsByClassName("e-single-price")[1].innerText;
+			const gp40HQString = selectorResults[i].getElementsByClassName("e-single-price")[2].innerText;
+			const gp20GP = (gp20GPString.includes("***")) ? 88888 : selectorResults[i].getElementsByClassName("e-single-number")[0].innerText;
+			const gp40GP = (gp40GPString.includes("***")) ? 88888 : selectorResults[i].getElementsByClassName("e-single-number")[1].innerText;
+			const gp40HQ = (gp40HQString.includes("***")) ? 88888 : selectorResults[i].getElementsByClassName("e-single-number")[2].innerText;
+
 			//format data and push it onto the array temp
 			resultSearch.push({
-				startPort: startPort ? startPort : cName("title blod")[index.startPort].innerText,
-				endPort: endPort ? endPort : cName("title blod")[index.endPort].innerText,
+				startPort: startPort,
+				endPort: endPort,
 				shipCompany: 'OOCL',
 				transferPort: tranferPort,
 				startPortPier: "",
 				endPortPier: "",
 				routeName: manifestRequest.route || "",
-				code: cName("serviceCode")[index.code].innerText,
-				overTime: parseDateTime(dayEle[index.day + 3].innerText),
+				code: code,
+				overTime: parseDateTime(overTime),
 				use: 0,
 				firstSupply: "",
 				remark: "",
-				remarkOp: trimArray(remarkOp[index.remarkOp].innerText.split(" "), 1, 0).join(" ") + ", " + trimArray(remarkOp[index.remarkOp + 1].innerText.split(" "), 1, 0).join(" "),
-				range: extractNumberFromString(cName("e-text")[index.range + 1].innerText),
-				sailingDay: parseDateTime(dayEle[index.day + 1].innerText),
-				startTime: parseDateTime(dayEle[index.day].innerText),
-				schedule: scheduleFun(parseDateTime(dayEle[index.day + 1].innerText)),
+				remarkOp: trimArray(remarkOp_0, 1, 0).join(" ") + ", " + trimArray(remarkOp_1, 1, 0).join(" "),
+				range: extractNumberFromString(range),
+				sailingDay: parseDateTime(sailingDay),
+				startTime: parseDateTime(startTime),
+				schedule: scheduleFun(parseDateTime(sailingDay)),
 				shippingSpace: "",
-				gp20GP: hidePrice ? 88888 : convertStringToNumber(cName("e-single-number")[index.price].innerText),
-				gp40GP: hidePrice ? 88888 : convertStringToNumber(cName("e-single-number")[index.price + 1].innerText),
-				gp40HQ: hidePrice ? 88888 : convertStringToNumber(cName("e-single-number")[index.price + 2].innerText),
+				gp20GP: gp20GP,
+				gp40GP: gp40GP,
+				gp40HQ: gp40HQ,
 			});
-
-			// update the index for the next crawl
-			index.code += 2;
-			index.range += 6;
-			index.startPort += 5;
-			index.endPort += 5;
-			index.day += 5;
-			index.transPort += 5;
-			index.remarkOp += 4;
-			index.gp += 3;
-			index.price += 3;
-			hidePrice = false;
 		} else {
+			// crawl data from OOCL
+			const startPort = startPortReq ? startPortReq : selectorResults[i].getElementsByClassName("title blod")[0].innerText;
+			const endPort = endPortReq ? endPortReq : selectorResults[i].getElementsByClassName("title blod")[3].innerText;
+			const routeName = manifestRequest.route || "";
+			const code = selectorResults[i].getElementsByClassName("serviceCode")[0].innerText;
+			const overTime = selectorResults[i].querySelectorAll(".time-info > span:nth-child(1)")[3].innerText;
+			const remarkOp = selectorResults[i].getElementsByClassName("svvd")[0].innerText.split(" ");
+			const range = selectorResults[i].getElementsByClassName("e-text")[0].innerText;
+			const sailingDay = selectorResults[i].querySelectorAll(".time-info > span:nth-child(1)")[1].innerText;
+			const startTime = selectorResults[i].querySelectorAll(".time-info > span:nth-child(1)")[0].innerText;
+
+			const tranferPortString = selectorResults[i].getElementsByClassName("title blod")[2].innerText;//handle tranferPort
+			const endEBPortName = capitalizeFirstLetter(endPort);
+			const endPortName = capitalizeFirstLetter(manifestRequest.endPort.end);
+			const tranferPort = (tranferPortString.includes(endEBPortName) || tranferPortString.includes(endPortName)) ? endPort : tranferPortString.split("-")[0].trim();
+
+			const gp20GPString = selectorResults[i].getElementsByClassName("e-single-price")[0].innerText; // handle price container
+			const gp40GPString = selectorResults[i].getElementsByClassName("e-single-price")[1].innerText;
+			const gp40HQString = selectorResults[i].getElementsByClassName("e-single-price")[2].innerText;
+			const gp20GP = (gp20GPString.includes("***")) ? 88888 : selectorResults[i].getElementsByClassName("e-single-number")[0].innerText;
+			const gp40GP = (gp40GPString.includes("***")) ? 88888 : selectorResults[i].getElementsByClassName("e-single-number")[1].innerText;
+			const gp40HQ = (gp40HQString.includes("***")) ? 88888 : selectorResults[i].getElementsByClassName("e-single-number")[2].innerText;
+
 			//format data and push it onto the array temp
 			resultSearch.push({
-				startPort: startPort ? startPort : cName("title blod")[index.startPort].innerText,
-				endPort: endPort ? endPort : cName("title blod")[index.endPort].innerText,
+				startPort: startPort,
+				endPort: endPort,
 				shipCompany: 'OOCL',
 				transferPort: tranferPort,
 				startPortPier: "",
 				endPortPier: "",
-				routeName: manifestRequest.route || "",
-				code: cName("serviceCode")[i].innerText,
-				overTime: parseDateTime(dayEle[index.day + 3].innerText),
+				routeName: routeName,
+				code: code,
+				overTime: parseDateTime(overTime),
 				use: 0,
-				firstSupply: "", //
+				firstSupply: "",
 				remark: "",
-				remarkOp: trimArray(remarkOp[index.remarkOp].innerText.split(" "), 1, 0).join(" "),
-				range: extractNumberFromString(cName("e-text")[index.range].innerText),
-				sailingDay: parseDateTime(dayEle[index.day + 1].innerText),
-				startTime: parseDateTime(dayEle[index.day].innerText), //
-				schedule: scheduleFun(parseDateTime(dayEle[index.day + 1].innerText)),
+				remarkOp: trimArray(remarkOp, 1, 0).join(" "),
+				range: extractNumberFromString(range),
+				sailingDay: parseDateTime(sailingDay),
+				startTime: parseDateTime(startTime), //
+				schedule: scheduleFun(parseDateTime(sailingDay)),
 				shippingSpace: "",
-				gp20GP: hidePrice ? 88888 : convertStringToNumber(cName("e-single-number")[index.price].innerText),
-				gp40GP: hidePrice ? 88888 : convertStringToNumber(cName("e-single-number")[index.price + 1].innerText),
-				gp40HQ: hidePrice ? 88888 : convertStringToNumber(cName("e-single-number")[index.price + 2].innerText),
+				gp20GP: gp20GP,
+				gp40GP: gp40GP,
+				gp40HQ: gp40HQ,
 			});
-
-			// update the index for the next crawl
-			index.startPort += 5;
-			index.endPort += 5;
-			index.day += 4;
-			index.transPort += 4;
-			index.remarkOp += 3;
-			index.gp += 3;
-			index.price += 3;
-			index.range += 5;
-			hidePrice = false;
 		}
 	}
 
 	data = { resultsSearch: resultSearch };
-
 	return data;
 }
 
