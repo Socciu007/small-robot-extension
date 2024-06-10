@@ -10,9 +10,6 @@ FyApp.controller("popupController", [
     $scope.workingStage = "";
     $scope.pageLoaded = false;
 
-    // 在 popup.js 中获取背景页
-    const backgroundPage = chrome.extension.getBackgroundPage();
-
     chrome.storage.local.get(["pageLoaded"], function (items) {
       $scope.pageLoaded = !!items.pageLoaded;
     });
@@ -1027,22 +1024,27 @@ FyApp.controller("popupController", [
       if ($scope.opPort[$scope.routeIndex].length == 0) {
         if ($scope.allCrawlData.length > 0) {
           // Copy and remove duplicates
-          const newAllCrawData = $scope.allCrawlData.filter((item, index, self) => {
-            return self.findIndex((otherItem) =>
-              item.startPort === otherItem.startPort &&
-              item.range === otherItem.range &&
-              item.endPort === otherItem.endPort &&
-              item.transferPort === otherItem.transferPort &&
-              item.shipCompany === otherItem.shipCompany &&
-              item.startPortPier === otherItem.startPortPier &&
-              item.endPortPier === otherItem.endPortPier &&
-              item.routeName === otherItem.routeName &&
-              item.sailingDay === otherItem.sailingDay &&
-              item.firstSupply === otherItem.firstSupply &&
-              item.code === otherItem.code &&
-              item.schedule === otherItem.schedule
-            ) === index
-          });
+          const newAllCrawData = $scope.allCrawlData.filter(
+            (item, index, self) => {
+              return (
+                self.findIndex(
+                  (otherItem) =>
+                    item.startPort === otherItem.startPort &&
+                    item.range === otherItem.range &&
+                    item.endPort === otherItem.endPort &&
+                    item.transferPort === otherItem.transferPort &&
+                    item.shipCompany === otherItem.shipCompany &&
+                    item.startPortPier === otherItem.startPortPier &&
+                    item.endPortPier === otherItem.endPortPier &&
+                    item.routeName === otherItem.routeName &&
+                    item.sailingDay === otherItem.sailingDay &&
+                    item.firstSupply === otherItem.firstSupply &&
+                    item.code === otherItem.code &&
+                    item.schedule === otherItem.schedule
+                ) === index
+              );
+            }
+          );
           // send crawl data to API interface
           await $.ajax({
             url: "http://localhost:3000/moneyapi/crawlDataOOCL",
@@ -1086,9 +1088,56 @@ FyApp.controller("popupController", [
     });
 
     // 监听页面是否加载完成
-    chrome.tabs.onUpdated.addListener(function (tabid, changeInfo, tab) {
-      if (tabid !== $scope.working_tab_id) return false;
+    // chrome.tabs.onUpdated.addListener(function (tabid, changeInfo, tab) {
+    //   if (tabid !== $scope.working_tab_id) return false;
+    //   if (changeInfo.status === "complete") {
+    //     $scope.closeAlert();
+    //     $scope.pageLoaded = true;
+    //     chrome.storage.local.set({ pageLoaded: true });
+    //   } else if (changeInfo.status === "loading") {
+    //     $scope.pageLoaded = false;
+    //     chrome.storage.local.set({ pageLoaded: false });
+    //   }
+    //   $scope.$apply();
+    // });
+
+    // 监听页面是否加载完成
+    chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+      console.log("changeInfo", tabId, changeInfo, tab);
+      if (tabId !== $scope.working_tab_id) return false;
+
       if (changeInfo.status === "complete") {
+        if (
+          tab.url &&
+          tab.url.includes("https://freightsmart.oocl.com/app/prebooking")
+        ) {
+          chrome.tabs.query(
+            { active: true, currentWindow: true },
+            function (tabs) {
+              var activeTab = tabs[0];
+              // 目标页在浏览器中的id
+              $scope.working_tab_id = activeTab.id;
+              $scope.runWorkingStage(
+                activeTab,
+                "https://freightsmart.oocl.com/app/prebooking"
+              );
+
+              chrome.tabs.executeScript(
+                $scope.working_tab_id,
+                { file: "assets/js/content_script.js" },
+                function () {
+                  setTimeout(() => {
+                    chrome.tabs.sendMessage($scope.working_tab_id, {
+                      status: 1,
+                      updateTab: true,
+                    });
+                  }, 1000);
+                }
+              );
+            }
+          );
+        }
+
         $scope.closeAlert();
         $scope.pageLoaded = true;
         chrome.storage.local.set({ pageLoaded: true });
@@ -1096,17 +1145,12 @@ FyApp.controller("popupController", [
         $scope.pageLoaded = false;
         chrome.storage.local.set({ pageLoaded: false });
       }
+      // Áp dụng các thay đổi của AngularJS
       $scope.$apply();
     });
 
     //判断目标页是否已经打开
     $scope.runWorkingStage = function (tab, urlMain) {
-      if (!backgroundPage.getVariable()) {
-        chrome.tabs.executeScript(tab.id, {
-          file: "assets/js/content_script.js",
-        });
-      }
-
       if (tab.url.indexOf(urlMain) === -1) {
         chrome.tabs.update(tab.id, { url: urlMain });
       } else {
@@ -1124,19 +1168,5 @@ FyApp.controller("popupController", [
         $scope.runWorkingStage(tab, zl_manifest_url);
       });
     });
-
-    $scope.$watch('workingStage', function (newVal, oldVal) {
-      if (newVal === oldVal) {
-        return false;
-      }
-      chrome.storage.local.set({ 'workingStage': newVal });
-      $scope.workingStage = newVal;
-      $scope.showAlert('正在加载页面...', 'success');
-      if ($scope.working_tab_id === 0) return false;
-      chrome.tabs.get($scope.working_tab_id, function (tab) {
-        $scope.runWorkingStage(tab);
-      });
-    }, false);
-
   },
 ]);
