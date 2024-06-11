@@ -4,15 +4,39 @@ FyApp.controller("popupController", [
   "$scope",
   "$http",
   function popupController($scope, $http) {
-    var zl_manifest_url =
-      "https://freightsmart.oocl.com/digital/product/search-quote";
+    var zl_manifest_url = "https://freightsmart.oocl.com/digital/product/search-quote";
     $scope.working_tab_id = 0;
-    $scope.workingStage = "";
+    $scope.workingStage = false;
+    $scope.isUpdatedTab = false;
     $scope.pageLoaded = false;
 
-    chrome.storage.local.get(["pageLoaded"], function (items) {
+    // Load initial state from chrome.storage.local
+    chrome.storage.local.get(["pageLoaded", "workingStage"], function (items) {
       $scope.pageLoaded = !!items.pageLoaded;
+      $scope.workingStage = !!items.workingStage;
+      $scope.$apply(); // Apply changes to the scope
     });
+
+    // Watch for changes to workingStage and save to chrome.storage.local
+    // $scope.$watch("workingStage", function (newVal, oldVal) {
+    //   console.log("test", oldVal, newVal);
+    //   if (newVal !== oldVal) {
+    //     chrome.storage.local.set({ workingStage: newVal });
+    //     $scope.showAlert("正在加载页面...", "success");
+    //     if ($scope.isUpdatedTab) {
+    //       chrome.tabs.get($scope.working_tab_id, function (tab) {
+    //         $scope.runWorkingStage(tab, tab.url);
+    //       });
+    //       chrome.tabs.executeScript($scope.working_tab_id, {
+    //         file: "assets/js/content_script.js",
+    //       });
+    //       chrome.tabs.sendMessage($scope.working_tab_id, {
+    //         updateTab: true,
+    //       });
+    //       $scope.isUpdatedTab = false;
+    //     }
+    //   }
+    // });
 
     //notification popup
     $scope.alert_message = {
@@ -1088,68 +1112,35 @@ FyApp.controller("popupController", [
     });
 
     // 监听页面是否加载完成
-    // chrome.tabs.onUpdated.addListener(function (tabid, changeInfo, tab) {
-    //   if (tabid !== $scope.working_tab_id) return false;
-    //   if (changeInfo.status === "complete") {
-    //     $scope.closeAlert();
-    //     $scope.pageLoaded = true;
-    //     chrome.storage.local.set({ pageLoaded: true });
-    //   } else if (changeInfo.status === "loading") {
-    //     $scope.pageLoaded = false;
-    //     chrome.storage.local.set({ pageLoaded: false });
-    //   }
-    //   $scope.$apply();
-    // });
-
-    // 监听页面是否加载完成
     chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-      console.log("changeInfo", tabId, changeInfo, tab);
       if (tabId !== $scope.working_tab_id) return false;
-
+      console.log("tab", changeInfo);
       if (changeInfo.status === "complete") {
-        if (
-          tab.url &&
-          tab.url.includes("https://freightsmart.oocl.com/app/prebooking")
-        ) {
-          chrome.tabs.query(
-            { active: true, currentWindow: true },
-            function (tabs) {
-              var activeTab = tabs[0];
-              // 目标页在浏览器中的id
-              $scope.working_tab_id = activeTab.id;
-              $scope.runWorkingStage(
-                activeTab,
-                "https://freightsmart.oocl.com/app/prebooking"
-              );
-
-              chrome.tabs.executeScript(
-                $scope.working_tab_id,
-                { file: "assets/js/content_script.js" },
-                function () {
-                  setTimeout(() => {
-                    chrome.tabs.sendMessage($scope.working_tab_id, {
-                      status: 1,
-                      updateTab: true,
-                    });
-                  }, 1000);
-                }
-              );
-            }
-          );
-        }
-
         $scope.closeAlert();
         $scope.pageLoaded = true;
         chrome.storage.local.set({ pageLoaded: true });
       } else if (changeInfo.status === "loading") {
         $scope.pageLoaded = false;
         chrome.storage.local.set({ pageLoaded: false });
+        if (changeInfo.url && changeInfo.url.includes("https://freightsmart.oocl.com/app/prebooking")) {
+          chrome.tabs.get($scope.working_tab_id, function (tab) {
+            $scope.runWorkingStage(tab, tab.url);
+          });
+          chrome.tabs.executeScript($scope.working_tab_id, {
+            file: "assets/js/content_script.js",
+          });
+          chrome.tabs.sendMessage($scope.working_tab_id, {
+            updateTab: true,
+          });
+          // $scope.isUpdatedTab = true;
+          // $scope.workingStage = true;
+          // chrome.storage.local.set({ workingStage: true });
+        }
       }
-      // Áp dụng các thay đổi của AngularJS
-      $scope.$apply();
+      $scope.$apply(); // Apply changes to the scope
     });
 
-    //判断目标页是否已经打开
+    // Run working stage method
     $scope.runWorkingStage = function (tab, urlMain) {
       if (tab.url.indexOf(urlMain) === -1) {
         chrome.tabs.update(tab.id, { url: urlMain });
@@ -1159,11 +1150,10 @@ FyApp.controller("popupController", [
       $scope.$apply();
     };
 
-    // 监听目标页是否加载完成
+    // Initialize working tab and stage
     $(function () {
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         var tab = tabs[0];
-        // 目标页在浏览器中的id
         $scope.working_tab_id = tab.id;
         $scope.runWorkingStage(tab, zl_manifest_url);
       });

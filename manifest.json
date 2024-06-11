@@ -6,9 +6,7 @@
     "permissions": [
         "tabs",
         "storage",
-        "*://www.master-agency.com.cn/*",
-        "*://synconhub.coscoshipping.com/*",
-        "*://*.sfyf.cn/*",
+        "*://freightsmart.oocl.com/*",
         "<all_urls>"
     ],
     "browser_action": {
