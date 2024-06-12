@@ -186,19 +186,23 @@ async function typeText(elementSelector, text) {
 		// handle change input value
 		const inputEvent = new Event("input", { bubbles: true });
 		inputElement.dispatchEvent(inputEvent);
+		await sleep(1000);
+		inputElement.click();
+		// wait for input show select
 		await sleep(3000);
 
 		// select option of menu
 		const listPort = cName("city");
-		await sleep(1000);
 		for (let i = 0; i < listPort.length; i++) {
-			if (listPort[i].innerText.includes(capitalizeFirstLetter(text))) {
+			await sleep(1000);
+			if (listPort[i].innerText.includes(text) || listPort[i].innerText.includes(capitalizeFirstLetter(text))) {
 				listPort[i].dispatchEvent(focusEvent);
 				await sleep(1000);
 
 				listPort[i].click();
 				break;
 			}
+			await sleep(3000);
 		}
 	} catch (error) {
 		console.error("Err typing text ", error);
