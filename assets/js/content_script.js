@@ -462,7 +462,6 @@ async function crawlData() {
 				? "88888"
 				: selectorResults[i].getElementsByClassName("e-single-number")[2]
 					.innerText;
-			console.log(parseFloat(gp20GP.replace(/,/g, '')));
 			//format data and push it onto the array temp
 			resultSearch.push({
 				startPort: startPort,
@@ -487,8 +486,6 @@ async function crawlData() {
 				gp40GP: parseFloat(gp40GP.replace(/,/g, '')),
 				gp40HQ: parseFloat(gp40HQ.replace(/,/g, '')),
 			});
-
-			console.log("result: ", resultSearch);
 		}
 	}
 
