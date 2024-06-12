@@ -6,37 +6,14 @@ FyApp.controller("popupController", [
   function popupController($scope, $http) {
     var zl_manifest_url = "https://freightsmart.oocl.com/digital/product/search-quote";
     $scope.working_tab_id = 0;
-    $scope.workingStage = false;
-    $scope.isUpdatedTab = false;
+    $scope.workingStage = "";
     $scope.pageLoaded = false;
 
     // Load initial state from chrome.storage.local
-    chrome.storage.local.get(["pageLoaded", "workingStage"], function (items) {
+    chrome.storage.local.get(["pageLoaded"], function (items) {
       $scope.pageLoaded = !!items.pageLoaded;
-      $scope.workingStage = !!items.workingStage;
-      $scope.$apply(); // Apply changes to the scope
+      $scope.$apply();
     });
-
-    // Watch for changes to workingStage and save to chrome.storage.local
-    // $scope.$watch("workingStage", function (newVal, oldVal) {
-    //   console.log("test", oldVal, newVal);
-    //   if (newVal !== oldVal) {
-    //     chrome.storage.local.set({ workingStage: newVal });
-    //     $scope.showAlert("正在加载页面...", "success");
-    //     if ($scope.isUpdatedTab) {
-    //       chrome.tabs.get($scope.working_tab_id, function (tab) {
-    //         $scope.runWorkingStage(tab, tab.url);
-    //       });
-    //       chrome.tabs.executeScript($scope.working_tab_id, {
-    //         file: "assets/js/content_script.js",
-    //       });
-    //       chrome.tabs.sendMessage($scope.working_tab_id, {
-    //         updateTab: true,
-    //       });
-    //       $scope.isUpdatedTab = false;
-    //     }
-    //   }
-    // });
 
     //notification popup
     $scope.alert_message = {
@@ -61,7 +38,7 @@ FyApp.controller("popupController", [
       endPort: "",
     };
 
-    //start port
+    //setup start port
     $scope.startPort = [
       { id: 0, nameEn: "SHANGHAI", nameEnEB: "SHANGHAI", name: "上海" },
       { id: 1, nameEn: "SHEKOU", nameEnEB: "SHENZHEN", name: "深圳-蛇口" },
@@ -78,6 +55,7 @@ FyApp.controller("popupController", [
     ];
     $scope.startPortIndex = "0";
 
+    // setup route for start port
     $scope.route = [
       [
         { value: "澳洲线", id: 0 },
@@ -103,6 +81,7 @@ FyApp.controller("popupController", [
     ];
     $scope.routeIndex = "0";
 
+    //setup terminal port
     $scope.endPort = [
       // 上海 6
       [
@@ -966,9 +945,9 @@ FyApp.controller("popupController", [
     ];
     $scope.runningPort = false;
     $scope.finish = false;
-    $scope.finishTxt = "";
-    $scope.opPort = [];
-    $scope.allCrawlData = [];
+    $scope.finishTxt = ""; // text notification to finish
+    $scope.opPort = []; // save terminal port accordingly
+    $scope.allCrawlData = []; // save scraping data to temporary array
 
     $scope.runFile = function (isFirstInput) {
       //  判断页面是否加载完成
@@ -982,11 +961,11 @@ FyApp.controller("popupController", [
       } else if ($scope.routeIndex == "") {
         return $scope.showAlert("Please select route", "danger");
       } else {
+        //update allCrawlData when running end port new
         chrome.tabs.executeScript($scope.working_tab_id, {
           file: "assets/js/content_script.js",
         });
         $scope.runningPort = true;
-        //update allCrawlData when running end port new
         $scope.allCrawlData = [];
         $scope.search(
           $scope.startPort[$scope.startPortIndex],
@@ -1028,7 +1007,7 @@ FyApp.controller("popupController", [
         $scope.finish = true;
         $scope.finishTxt = "哎呦! 出错了~~~";
         $scope.$apply();
-      } else if (status === 1 && data.resultsSearch.length > 0) {
+      } else if (status === 1 && Array.isArray(data.resultsSearch)) {
         $scope.allCrawlData = $scope.allCrawlData.concat(...data.resultsSearch);
         if ($scope.opPort[$scope.routeIndex].length > 0) {
           $scope.search(
@@ -1038,10 +1017,19 @@ FyApp.controller("popupController", [
         }
       } else {
         if ($scope.opPort[$scope.routeIndex].length > 0) {
-          $scope.search(
-            $scope.startPort[$scope.startPortIndex],
-            $scope.opPort[$scope.routeIndex][0]
-          );
+          setTimeout(() => {
+            chrome.tabs.get($scope.working_tab_id, function (tab) {
+              $scope.runWorkingStage(tab, zl_manifest_url);
+            });
+            chrome.tabs.executeScript($scope.working_tab_id, {
+              file: "assets/js/content_script.js",
+            });
+            $scope.search(
+              $scope.startPort[$scope.startPortIndex],
+              $scope.opPort[$scope.routeIndex][0],
+              true
+            );
+          }, 3000);
         }
       }
 
@@ -1091,7 +1079,6 @@ FyApp.controller("popupController", [
                   " 操作完成";
                 $scope.$apply();
               } else {
-                console.error("Error creating quote:", res.message);
                 $scope.runningPort = false;
                 $scope.finish = true;
                 $scope.finishTxt = res.message;
@@ -1099,7 +1086,6 @@ FyApp.controller("popupController", [
               }
             },
             error: function (err) {
-              console.error("AJAX error:", err.responseJSON.errors);
               $scope.allCrawlData = [];
               $scope.runningPort = false;
               $scope.finish = true;
@@ -1107,6 +1093,18 @@ FyApp.controller("popupController", [
               $scope.$apply();
             },
           });
+        } else {
+          $scope.runningPort = false;
+          $scope.finish = true;
+          const item = $scope.route
+            .flat()
+            .find((item) => item.id === Number($scope.routeIndex));
+          $scope.finishTxt =
+            $scope.startPort[$scope.startPortIndex].nameEnEB +
+            " * " +
+            item.value +
+            " 操作完成";
+          $scope.$apply();
         }
       }
     });
@@ -1114,7 +1112,6 @@ FyApp.controller("popupController", [
     // 监听页面是否加载完成
     chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
       if (tabId !== $scope.working_tab_id) return false;
-      console.log("tab", changeInfo);
       if (changeInfo.status === "complete") {
         $scope.closeAlert();
         $scope.pageLoaded = true;
@@ -1122,6 +1119,7 @@ FyApp.controller("popupController", [
       } else if (changeInfo.status === "loading") {
         $scope.pageLoaded = false;
         chrome.storage.local.set({ pageLoaded: false });
+        //run Content_script.js after updating the new url
         if (changeInfo.url && changeInfo.url.includes("https://freightsmart.oocl.com/app/prebooking")) {
           chrome.tabs.get($scope.working_tab_id, function (tab) {
             $scope.runWorkingStage(tab, tab.url);
@@ -1132,12 +1130,9 @@ FyApp.controller("popupController", [
           chrome.tabs.sendMessage($scope.working_tab_id, {
             updateTab: true,
           });
-          // $scope.isUpdatedTab = true;
-          // $scope.workingStage = true;
-          // chrome.storage.local.set({ workingStage: true });
         }
       }
-      $scope.$apply(); // Apply changes to the scope
+      $scope.$apply();
     });
 
     // Run working stage method

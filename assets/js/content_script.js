@@ -87,17 +87,22 @@ chrome.runtime.onMessage.addListener(async function (
 		const searchEle = cName("ect-search-btn");
 		searchEle[0].scrollIntoView();
 		searchEle[0].click();
-		await sleep(1000);
-		console.log("Done click");
+		await sleep(5000);
 
 		const backSearchEle = cName("jump-link");
-		backSearchEle[0].click();
-		await sleep(1000);
+		if (backSearchEle[0]) {
+			chrome.runtime.sendMessage(
+				{ actionId: "searchComplete", status: 1, data: {} },
+				function (res) { }
+			);
+			backSearchEle[0].click();
+			await sleep(1000);
+		}
 	}
 
 	const isSearch = await search(manifestRequest, isFirstInput);
-	//loading search results
-	await sleep(random(5000, 10000));
+	await sleep(random(7000, 10000));
+
 	if (isSearch) {
 		const data = await setManifestHtml();
 		console.log("data", data);
@@ -201,22 +206,6 @@ async function typeText(elementSelector, text) {
 }
 
 // 鼠标点击事件
-function mClick(dom) {
-	return new Promise((resolve, reject) => {
-		try {
-			var event = new MouseEvent("click", {
-				view: window,
-				bubbles: true,
-				cancelable: true,
-			});
-			dom.dispatchEvent(event);
-			resolve(true);
-		} catch (error) {
-			reject(error);
-		}
-	});
-}
-
 function clickElement(element) {
 	return new Promise(async (resolve) => {
 		try {
@@ -319,50 +308,6 @@ function cName(name) {
 	return document.getElementsByClassName(name);
 }
 
-function isLoggedIn() {
-	const cookies = document.cookie.split(";");
-	for (let i = 0; i < cookies.length; i++) {
-		const cookie = cookies[i].trim();
-		if (cookie.startsWith("token=")) {
-			return true;
-		}
-	}
-	return false;
-}
-
-async function loginOOCL(userName, password) {
-	let isLogin = false;
-	try {
-		const eleUserName = await cSelector('input[class="el-input__inner"]');
-		const eleNext = await cSelector('button[type="button"]');
-		if (eleUserName && eleNext) {
-			await typeText(eleUserName, userName);
-			await sleep(random(1000, 3000));
-			await mClick(eleNext);
-			await sleep(random(1000, 3000));
-
-			const elePassword = await cSelector("input#login-password-input");
-			const eleLogin = await cSelector('button[type="button"]');
-			if (elePassword && eleLogin && elePassword.value === password) {
-				await mClick(await cSelector('button[type="button"]'));
-				isLogin = true;
-			} else if (elePassword && eleLogin) {
-				await typeText(elePassword, password, 1000);
-				await sleep(random(1000, 3000));
-				await mClick(eleLogin);
-				isLogin = true;
-			} else {
-				isLogin = false;
-			}
-		} else {
-			return isLogin;
-		}
-		return isLogin;
-	} catch (error) {
-		return isLogin;
-	}
-}
-
 function capitalizeFirstLetter(string) {
 	return string.toLowerCase().replace(/(?:^|\s)\w/g, function (match) {
 		return match.toUpperCase();
@@ -377,11 +322,11 @@ async function crawlData() {
 	const endPortReq = manifestRequest.endPort.endEB;
 
 	const selectorResults = cName("product-content-card"); //all data after searching
-	let resultSearch = [];
+	const resultSearch = [];
 
 	for (let i = 0; i < selectorResults.length; i++) {
 		const showInfoEle = cName("unfold-hide-wrapper"); // show detail data before crawl data
-		if (showInfoEle.length > 0) {
+		if (showInfoEle && showInfoEle.length > 0) {
 			for (let j = 0; j < showInfoEle.length; j++) {
 				showInfoEle[j].click();
 				await sleep(random(2000, 3000));
@@ -434,15 +379,15 @@ async function crawlData() {
 				selectorResults[i].getElementsByClassName("e-single-price")[2]
 					.innerText;
 			const gp20GP = gp20GPString.includes("***")
-				? 88888
+				? "88888"
 				: selectorResults[i].getElementsByClassName("e-single-number")[0]
 					.innerText;
 			const gp40GP = gp40GPString.includes("***")
-				? 88888
+				? "88888"
 				: selectorResults[i].getElementsByClassName("e-single-number")[1]
 					.innerText;
 			const gp40HQ = gp40HQString.includes("***")
-				? 88888
+				? "88888"
 				: selectorResults[i].getElementsByClassName("e-single-number")[2]
 					.innerText;
 
@@ -469,9 +414,9 @@ async function crawlData() {
 				startTime: parseDateTime(startTime),
 				schedule: scheduleFun(parseDateTime(sailingDay)),
 				shippingSpace: "",
-				gp20GP: gp20GP,
-				gp40GP: gp40GP,
-				gp40HQ: gp40HQ,
+				gp20GP: parseFloat(gp20GP.replace(/,/g, '')),
+				gp40GP: parseFloat(gp40GP.replace(/,/g, '')),
+				gp40HQ: parseFloat(gp40HQ.replace(/,/g, '')),
 			});
 		} else {
 			// crawl data from OOCL
@@ -482,32 +427,19 @@ async function crawlData() {
 				? endPortReq
 				: selectorResults[i].getElementsByClassName("title blod")[3].innerText;
 			const routeName = manifestRequest.route || "";
-			const code =
-				selectorResults[i].getElementsByClassName("serviceCode")[0].innerText;
-			const overTime = selectorResults[i].querySelectorAll(
-				".time-info > span:nth-child(1)"
-			)[3].innerText;
-			const remarkOp = selectorResults[i]
-				.getElementsByClassName("svvd")[0]
-				.innerText.split(" ");
-			const range =
-				selectorResults[i].getElementsByClassName("e-text")[0].innerText;
-			const sailingDay = selectorResults[i].querySelectorAll(
-				".time-info > span:nth-child(1)"
-			)[1].innerText;
-			const startTime = selectorResults[i].querySelectorAll(
-				".time-info > span:nth-child(1)"
-			)[0].innerText;
+			const code = selectorResults[i].getElementsByClassName("serviceCode")[0].innerText;
+			const overTime = selectorResults[i].querySelectorAll(".time-info > span:nth-child(1)")[3].innerText;
+			const remarkOp = selectorResults[i].getElementsByClassName("svvd")[1].innerText.split(" ");
+			const range = selectorResults[i].getElementsByClassName("e-text")[0].innerText;
+			const sailingDay = selectorResults[i].querySelectorAll(".time-info > span:nth-child(1)")[1].innerText;
+			const startTime = selectorResults[i].querySelectorAll(".time-info > span:nth-child(1)")[0].innerText;
 
-			const tranferPortString =
-				selectorResults[i].getElementsByClassName("title blod")[2].innerText; //handle tranferPort
+			const tranferPortString = selectorResults[i].getElementsByClassName("title blod")[2].innerText; //handle tranferPort
 			const endEBPortName = capitalizeFirstLetter(endPort);
 			const endPortName = capitalizeFirstLetter(manifestRequest.endPort.end);
-			const tranferPort =
-				tranferPortString.includes(endEBPortName) ||
-					tranferPortString.includes(endPortName)
-					? endPort
-					: tranferPortString.split("-")[0].trim();
+			const tranferPort = (tranferPortString.includes(endEBPortName) || tranferPortString.includes(endPortName))
+				? endPort
+				: tranferPortString.split("-")[0].trim();
 
 			const gp20GPString =
 				selectorResults[i].getElementsByClassName("e-single-price")[0]
@@ -519,18 +451,18 @@ async function crawlData() {
 				selectorResults[i].getElementsByClassName("e-single-price")[2]
 					.innerText;
 			const gp20GP = gp20GPString.includes("***")
-				? 88888
+				? "88888"
 				: selectorResults[i].getElementsByClassName("e-single-number")[0]
 					.innerText;
 			const gp40GP = gp40GPString.includes("***")
-				? 88888
+				? "88888"
 				: selectorResults[i].getElementsByClassName("e-single-number")[1]
 					.innerText;
 			const gp40HQ = gp40HQString.includes("***")
-				? 88888
+				? "88888"
 				: selectorResults[i].getElementsByClassName("e-single-number")[2]
 					.innerText;
-
+			console.log(parseFloat(gp20GP.replace(/,/g, '')));
 			//format data and push it onto the array temp
 			resultSearch.push({
 				startPort: startPort,
@@ -548,13 +480,15 @@ async function crawlData() {
 				remarkOp: trimArray(remarkOp, 1, 0).join(" "),
 				range: extractNumberFromString(range),
 				sailingDay: parseDateTime(sailingDay),
-				startTime: parseDateTime(startTime), //
+				startTime: parseDateTime(startTime),
 				schedule: scheduleFun(parseDateTime(sailingDay)),
 				shippingSpace: "",
-				gp20GP: gp20GP,
-				gp40GP: gp40GP,
-				gp40HQ: gp40HQ,
+				gp20GP: parseFloat(gp20GP.replace(/,/g, '')),
+				gp40GP: parseFloat(gp40GP.replace(/,/g, '')),
+				gp40HQ: parseFloat(gp40HQ.replace(/,/g, '')),
 			});
+
+			console.log("result: ", resultSearch);
 		}
 	}
 
