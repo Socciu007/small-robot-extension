@@ -10,16 +10,20 @@ async function setManifestHtml() {
 		const data = await crawlData();
 		await sleep(random(1000, 3000));
 
-		//returns the search page after crawling
+		//returns the search page and clear text after crawling
 		const backEle = cName("el-page-header__back")[0];
+		backEle.scrollIntoView();
 		await sleep(random(1000, 3000));
 		backEle.click();
 		await sleep(random(1000, 3000));
 		const inputEle = cName("el-input__inner");
 		inputEle[0].scrollIntoView();
+		await sleep(1000);
 		inputEle[0].value = "";
+		inputEle[0].dispatchEvent(new Event('input', { bubbles: true }));
 		await sleep(random(1000, 3000));
 		inputEle[1].value = "";
+		inputEle[1].dispatchEvent(new Event('input', { bubbles: true }));
 		await sleep(random(1000, 3000));
 
 		return data;
@@ -67,9 +71,14 @@ async function search(keyWord, isFirstInput) {
 		await clickElement(searchEle);
 		await sleep(random(1000, 3000));
 
-		return true;
+		const resultEle = document.querySelector(".search-quote .no-search-result");
+		if (resultEle) {
+			return -1;
+		}
+
+		return 1;
 	} catch (error) {
-		return false;
+		return 0;
 	}
 }
 
@@ -82,7 +91,7 @@ chrome.runtime.onMessage.addListener(async function (
 	console.log("req", request);
 	manifestRequest = data;
 
-	if (updateTab) {
+	if (updateTab) { // new url updated tab and execute search again
 		await sleep(5000);
 		const searchEle = cName("ect-search-btn");
 		searchEle[0].scrollIntoView();
@@ -100,18 +109,31 @@ chrome.runtime.onMessage.addListener(async function (
 		}
 	}
 
-	const isSearch = await search(manifestRequest, isFirstInput);
+	const isSearch = await search(manifestRequest, isFirstInput); //execute search 
 	await sleep(random(7000, 10000));
 
-	if (isSearch) {
+	if (isSearch === 1) { // show result search in a new page
 		const data = await setManifestHtml();
-		console.log("data", data);
-
 		chrome.runtime.sendMessage(
 			{ actionId: "searchComplete", status: 1, data: data },
 			function (res) { }
 		);
-	} else {
+	} else if (isSearch === -1) { // show result search in the current page 
+		//clear text after crawl result is empty
+		const inputEle = cName("el-input__inner");
+		inputEle[0].scrollIntoView();
+		await sleep(1000);
+		inputEle[0].value = "";
+		inputEle[0].dispatchEvent(new Event('input', { bubbles: true }));
+		await sleep(random(1000, 3000));
+		inputEle[1].value = "";
+		inputEle[1].dispatchEvent(new Event('input', { bubbles: true }));
+		await sleep(random(1000, 3000));
+		chrome.runtime.sendMessage(
+			{ actionId: "searchComplete", status: 1, data: { resultsSearch: [] } },
+			function (res) { }
+		);
+	} else { // error execute search
 		chrome.runtime.sendMessage(
 			{ actionId: "searchComplete", status: 0, data: {} },
 			function (res) { }
@@ -186,8 +208,6 @@ async function typeText(elementSelector, text) {
 		// handle change input value
 		const inputEvent = new Event("input", { bubbles: true });
 		inputElement.dispatchEvent(inputEvent);
-		await sleep(1000);
-		inputElement.click();
 		// wait for input show select
 		await sleep(3000);
 
@@ -202,7 +222,7 @@ async function typeText(elementSelector, text) {
 				listPort[i].click();
 				break;
 			}
-			await sleep(3000);
+			await sleep(1000);
 		}
 	} catch (error) {
 		console.error("Err typing text ", error);
@@ -324,6 +344,7 @@ async function crawlData() {
 
 	const startPortReq = manifestRequest.startPort.nameEnEB;
 	const endPortReq = manifestRequest.endPort.endEB;
+	const routeName = manifestRequest.endPort.routeName;
 
 	const selectorResults = cName("product-content-card"); //all data after searching
 	const resultSearch = [];
@@ -364,13 +385,13 @@ async function crawlData() {
 			)[0].innerText;
 
 			const tranferPortString =
-				selectorResults[i].getElementsByClassName("title blod")[2].innerText; //handle tranferPort
-			const endEBPortName = capitalizeFirstLetter(endPort);
+				selectorResults[i].getElementsByClassName("title blod")[3].innerText; //handle tranferPort
+			const endEBPortName = capitalizeFirstLetter(endPortReq);
 			const endPortName = capitalizeFirstLetter(manifestRequest.endPort.end);
 			const tranferPort =
 				tranferPortString.includes(endEBPortName) ||
 					tranferPortString.includes(endPortName)
-					? endPort
+					? endPortReq
 					: tranferPortString.split("-")[0].trim();
 
 			const gp20GPString =
@@ -403,7 +424,7 @@ async function crawlData() {
 				transferPort: tranferPort,
 				startPortPier: "",
 				endPortPier: "",
-				routeName: manifestRequest.route || "",
+				routeName: routeName,
 				code: code,
 				overTime: parseDateTime(overTime),
 				use: 0,
@@ -430,7 +451,6 @@ async function crawlData() {
 			const endPort = endPortReq
 				? endPortReq
 				: selectorResults[i].getElementsByClassName("title blod")[3].innerText;
-			const routeName = manifestRequest.route || "";
 			const code = selectorResults[i].getElementsByClassName("serviceCode")[0].innerText;
 			const overTime = selectorResults[i].querySelectorAll(".time-info > span:nth-child(1)")[3].innerText;
 			const remarkOp = selectorResults[i].getElementsByClassName("svvd")[1].innerText.split(" ");
@@ -439,10 +459,10 @@ async function crawlData() {
 			const startTime = selectorResults[i].querySelectorAll(".time-info > span:nth-child(1)")[0].innerText;
 
 			const tranferPortString = selectorResults[i].getElementsByClassName("title blod")[2].innerText; //handle tranferPort
-			const endEBPortName = capitalizeFirstLetter(endPort);
+			const endEBPortName = capitalizeFirstLetter(endPortReq);
 			const endPortName = capitalizeFirstLetter(manifestRequest.endPort.end);
 			const tranferPort = (tranferPortString.includes(endEBPortName) || tranferPortString.includes(endPortName))
-				? endPort
+				? endPortReq
 				: tranferPortString.split("-")[0].trim();
 
 			const gp20GPString =

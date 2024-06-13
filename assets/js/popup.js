@@ -452,12 +452,11 @@ FyApp.controller("popupController", [
           endEB: "AJMAN",
           routeName: "中东线",
         },
-        ,
         // {
         //   end: 'BAHRAIN',
         //   endEB:'BAHRAIN',
         //   routeName: '中东线',
-        //  }
+        //  },
         {
           end: "BASRAH",
           endEB: "BASRAH",
@@ -981,10 +980,6 @@ FyApp.controller("popupController", [
           data: {
             startPort: startP,
             endPort: endP,
-            route:
-              $scope.startPortIndex == "0"
-                ? $scope.route[0][$scope.startPortIndex].value
-                : $scope.route[1][$scope.startPortIndex].value,
           },
           isFirstInput: isFirstInput,
         });
