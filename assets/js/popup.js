@@ -1054,7 +1054,7 @@ FyApp.controller("popupController", [
           );
           // send crawl data to API interface
           await $.ajax({
-            url: "http://localhost:3000/moneyapi/crawlDataOOCL",
+            url: "http://47.103.119.36:3000/moneyapi/crawlDataOOCL",
             type: "POST",
             data: JSON.stringify({ results: newAllCrawData }),
             contentType: "application/json",
