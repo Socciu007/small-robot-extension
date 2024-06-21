@@ -531,19 +531,37 @@ function trimArray(arr, a, b) {
 
 //convert string to date
 function parseDateTime(dateStr) {
-	const date = new Date(dateStr);
+	// Split the input string into date and time parts
+	const [day, month, time] = dateStr.split(' ');
 
-	// get day, month from date object
+	// Create a new Date object using the current year
+	const date = new Date();
 	const year = date.getFullYear();
-	const month = ("0" + (date.getMonth() + 1)).slice(-2);
-	const day = ("0" + date.getDate()).slice(-2);
 
-	// Format "xxxx-xx-xx"
-	const formattedDate = `${year}-${month}-${day}`;
+	// Create a map of month abbreviations to month numbers
+	const monthMap = {
+		Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+		Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
+	};
+
+	// Set the date object to the parsed date and time
+	date.setFullYear(year, monthMap[month], parseInt(day));
+	const [hours, minutes] = time.split(':');
+	date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+	// Get year, month, day, hours, minutes, and seconds from the date object
+	const formattedYear = date.getFullYear();
+	const formattedMonth = ("0" + (date.getMonth() + 1)).slice(-2);
+	const formattedDay = ("0" + date.getDate()).slice(-2);
+	const formattedHours = ("0" + date.getHours()).slice(-2);
+	const formattedMinutes = ("0" + date.getMinutes()).slice(-2);
+	const formattedSeconds = ("0" + date.getSeconds()).slice(-2);
+
+	// Format "yyyy-mm-dd hh:mm:ss"
+	const formattedDate = `${formattedYear}-${formattedMonth}-${formattedDay} ${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 
 	return formattedDate;
 }
-
 //extract number from string
 function extractNumberFromString(str) {
 	// use regex to find number
