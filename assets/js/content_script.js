@@ -1,8 +1,4 @@
 var manifestRequest = {};
-var user = {
-	name: "riverhe",
-	password: "Fy112516",
-};
 
 //OOCL
 async function setManifestHtml() {
